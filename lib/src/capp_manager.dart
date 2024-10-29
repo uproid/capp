@@ -14,9 +14,12 @@ class CappManager {
 
   void process() async {
     if (args.isEmpty) {
-      CappConsole.write("No command provided", CappColors.error);
+      main.init(manager: this);
+      var res = await main.run(main);
+      res.log();
       return;
     }
+
     try {
       for (var controller in controllers) {
         controller.init(manager: this);

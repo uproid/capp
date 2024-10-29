@@ -145,7 +145,7 @@ class CappConsole {
 
       while (isLoading) {
         stdout.write('\r$message ${spinner(spinnerIndex)}');
-        if (type == CappProgressType.bar) {
+        if (type != CappProgressType.circle) {
           spinnerIndex = (spinnerIndex + 1) % 30;
         } else {
           spinnerIndex++;
@@ -166,7 +166,7 @@ class CappConsole {
       }
       isLoading = false;
       await spinnerFuture;
-      stdout.write('\r$message Done!                            \n');
+      stdout.write('\r$message\t\tDone!                            \n');
     }
   }
 

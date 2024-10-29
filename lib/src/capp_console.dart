@@ -1,11 +1,16 @@
 import 'dart:io';
 
+/// [CappConsole] is a class that helps you to interact with the console.
+/// Here are some Console widgets that you can use
 class CappConsole {
   dynamic output;
   CappColors color;
   bool space;
 
+  /// [CappConsole] is a class that helps you to interact with the console.
   CappConsole(this.output, [this.color = CappColors.info, this.space = false]);
+
+  /// [log] method is used to print the output to the console.
   log() {
     var space = this.space ? '\n\n' : '';
     switch (color) {
@@ -30,12 +35,14 @@ class CappConsole {
     }
   }
 
+  /// [write] method is used to print the output to the console.
   static write(dynamic obj,
       [CappColors color = CappColors.none, space = false]) {
     CappConsole("${space ? '\n\n' : ''}$obj${space ? '\n\n' : ''}", color)
         .log();
   }
 
+  /// [clear] method is used to clear the console screen.
   static void clear() {
     if (Platform.isWindows) {
       Process.runSync('cls', [], runInShell: true);
@@ -44,6 +51,7 @@ class CappConsole {
     }
   }
 
+  /// [read] method is used to read the input from the console.
   static String read(
     String message, {
     bool isRequired = false,
@@ -97,6 +105,12 @@ class CappConsole {
     return res == str;
   }
 
+  /// [progress] method is used to show the progress widget of the action.
+  /// It can be a spinner, bar, or circle.
+  /// The [message] is the message that will be shown in the console.
+  /// The [action] is the action that will be executed.
+  /// The [type] is the type of the progress widget.
+  /// The [CappProgressType] is an enum that contains three types of progress widgets.
   static Future<T> progress<T>(
     String message,
     Future<T> Function() action, {
@@ -170,6 +184,11 @@ class CappConsole {
     }
   }
 
+  /// [select] method is used to select an option from the list of options.
+  /// The [message] is the message that will be shown in the console.
+  /// The [options] is the list of options.
+  /// The [isRequired] is a boolean that indicates if the option is required or not.
+  /// The method returns the selected option.
   static String select(
     String message,
     List<String> options, {
@@ -190,6 +209,10 @@ class CappConsole {
     return num != null && options.length > num - 1 ? options[num - 1] : '';
   }
 
+  /// [yesNo] method is used to ask a question that has a yes or no answer.
+  /// The [message] is the message that will be shown in the console.
+  /// The method returns a boolean value.
+  /// If the answer is yes, it returns true.
   static bool yesNo(String message) {
     var res = read("$message (y/n):");
     if (res.toLowerCase() == 'yes' || res.toLowerCase() == 'y') {
@@ -202,6 +225,10 @@ class CappConsole {
     }
   }
 
+  /// [writeTable] method is used to print a table in the console.
+  /// The [data] is the list of lists of strings that will be shown in the table.
+  /// The [dubleBorder] is a boolean that indicates if the table has a double border or not.
+  /// The [color] is the color of the table.
   static void writeTable(
     List<List<String>> data, {
     bool dubleBorder = false,
@@ -217,7 +244,7 @@ class CappConsole {
       }
     }
 
-    res += printBorder(columnWidths, set[2], set[4], false, true, set);
+    res += _printBorder(columnWidths, set[2], set[4], false, true, set);
 
     for (var i = 0; i < data.length; i++) {
       StringBuffer buffer = StringBuffer();
@@ -235,18 +262,18 @@ class CappConsole {
 
       if (i < data.length - 1) {
         if (columnWidths.length - 2 != i) {
-          res += printBorder(columnWidths, set[5], set[7], false, false, set);
+          res += _printBorder(columnWidths, set[5], set[7], false, false, set);
         } else {
-          res += printBorder(columnWidths, set[5], set[7], false, false, set);
+          res += _printBorder(columnWidths, set[5], set[7], false, false, set);
         }
       }
     }
 
-    res += printBorder(columnWidths, set[8], set[10], true, false, set);
+    res += _printBorder(columnWidths, set[8], set[10], true, false, set);
     write(res, color);
   }
 
-  static String printBorder(
+  static String _printBorder(
     List<int> columnWidths,
     String leftChar,
     String rightChar,
@@ -275,6 +302,8 @@ class CappConsole {
   }
 }
 
+/// [CappColors] is an enum that contains the colors that can be used in the console.
+/// The colors are none, warning, error, success, info, and off.
 enum CappColors {
   none,
   warnnig,
@@ -284,6 +313,8 @@ enum CappColors {
   off,
 }
 
+/// [CappProgressType] is an enum that contains three types of progress widgets.
+/// The types are spinner, bar, and circle.
 enum CappProgressType {
   spinner,
   bar,

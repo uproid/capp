@@ -2,16 +2,30 @@ import 'capp_controller.dart';
 import 'capp_console.dart';
 import 'capp_option.dart';
 
+/// [CappManager] is a class that represents the manager of the console application.
+/// The manager is a class that contains the main logic of the application.
 class CappManager {
+  /// [controllers] contin all contin all CappControllers that you can use in the app
   List<CappController> controllers;
+
+  /// [args] is a list of arguments that passed to the application from the console.
   List<String> args;
+
+  /// [main] is the main controller of the application. when the application starts the main controller will be called.
   CappController main;
+
+  /// The constructor of the CappManager class.
+  /// The [main] is the main controller of the application.
+  /// The [args] is a list of arguments that passed to the application from the console.
+  /// The [controllers] is a list of controllers that can be called from the console.
   CappManager({
     required this.main,
     required this.args,
     required this.controllers,
   });
 
+  /// The [process] method is used to process the arguments and call the controllers.
+  /// Call this function to start the application.
   void process() async {
     if (args.isEmpty) {
       main.init(manager: this);
@@ -53,6 +67,9 @@ class CappManager {
     CappConsole.write(getHelp(), CappColors.warnnig);
   }
 
+  /// The [getHelp] method is used to get the help of the application.
+  /// The [myControllers] is a list of controllers that you want to show in the help. If it is null it will show all controllers.
+  /// you can call this method from the controller to get the help of the application.
   String getHelp([List<CappController>? myControllers]) {
     var selectedControllers = myControllers ?? [...this.controllers, main];
     var help = "Available commands:\n";

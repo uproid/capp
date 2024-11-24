@@ -39,6 +39,7 @@ Future<CappConsole> test(CappController c) async {
     'Progress circle',
     'Progress bar',
     'Progress spinner',
+    'Progress timer',
     'Yes/No questions',
     'Input text',
     'Make a table',
@@ -53,7 +54,7 @@ Future<CappConsole> test(CappController c) async {
   CappConsole.write('Your selection is: $select', CappColors.success);
 
   // Progress circle
-  if (select == options[0]) {
+  if (select == 'Progress circle') {
     await CappConsole.progress(
       'I am waiting here for 5 secounds!',
       () async => Future.delayed(Duration(seconds: 5)),
@@ -61,7 +62,7 @@ Future<CappConsole> test(CappController c) async {
     );
   }
   // Progress bar
-  else if (select == options[1]) {
+  else if (select == 'Progress bar') {
     await CappConsole.progress(
       'I am waiting here for 5 secounds!',
       () async => Future.delayed(Duration(seconds: 5)),
@@ -69,15 +70,22 @@ Future<CappConsole> test(CappController c) async {
     );
   }
   // Progress spinner
-  else if (select == options[2]) {
+  else if (select == 'Progress spinner') {
     await CappConsole.progress(
       'I am waiting here for 5 secounds!',
       () async => Future.delayed(Duration(seconds: 5)),
       type: CappProgressType.spinner,
     );
   }
+  else if (select == 'Progress timer') {
+    await CappConsole.progress(
+      'I am waiting here for 5 secounds!',
+      () async => Future.delayed(Duration(seconds: 5)),
+      type: CappProgressType.timer,
+    );
+  }
   // Yes/No Questions
-  else if (select == options[3]) {
+  else if (select == 'Yes/No questions') {
     final res = await CappConsole.yesNo('Do you agree? ');
     CappConsole.write(
       "Your answer is ${res ? 'YES' : 'NO'}",
@@ -85,7 +93,7 @@ Future<CappConsole> test(CappController c) async {
     );
   }
   // Input text
-  else if (select == options[4]) {
+  else if (select == 'Input text') {
     var age = CappConsole.read(
       'What is your age?',
       isRequired: true,
@@ -98,12 +106,12 @@ Future<CappConsole> test(CappController c) async {
     );
   }
   // Make a table
-  else if (select == options[5]) {
+  else if (select == 'Make a table') {
     const table = [
       ['#', 'Name', 'Age', 'City', 'Job'],
       ['1', 'Farhad', '38', 'Amsterdam', 'Engineer'],
       ['2', 'Adrian', '25', 'Berlin', 'Teacher'],
-      ['3', 'Arian', '33', 'Frankfort0', 'Taxi driver']
+      ['3', 'Arian', '33', 'Frankfort', 'Taxi driver']
     ];
 
     CappConsole.writeTable(table);
@@ -115,11 +123,12 @@ Future<CappConsole> test(CappController c) async {
     );
   }
   // Clear Screen
-  else if (select == options[6]) {
+  else if (select == 'Clear screen') {
     CappConsole.clear();
   }
+
   // Help
-  else if (select == options[7]) {
+  else if (select == 'Help') {
     CappConsole.write(c.manager.getHelp());
   } else if (select == options.last) {
     return CappConsole('Exit!');

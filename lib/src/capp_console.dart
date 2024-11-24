@@ -120,6 +120,7 @@ class CappConsole {
     bool isWindows = Platform.isWindows;
 
     Future<void> showSpinner() async {
+      var startTime = DateTime.timestamp();
       String spinner(int index) {
         if (type == CappProgressType.bar) {
           var res = '';
@@ -136,6 +137,9 @@ class CappConsole {
         } else if (type == CappProgressType.circle) {
           var rotating = '⣿⣷⣯⣟⡿⢿⣻⣽⣾';
           return "\t\t" + rotating[(index ~/ 1.5) % rotating.length] + ' ';
+        } else if (type == CappProgressType.timer) {
+          var time = DateTime.timestamp().difference(startTime);
+          return '\t\t${time.inSeconds}.${time.inMilliseconds ~/ 100 % 10}s ';
         } else {
           var res = '|';
           for (var i = 0; i < 30; i++) {
@@ -314,9 +318,10 @@ enum CappColors {
 }
 
 /// [CappProgressType] is an enum that contains three types of progress widgets.
-/// The types are spinner, bar, and circle.
+/// The types are spinner, bar, timer, and circle.
 enum CappProgressType {
   spinner,
   bar,
   circle,
+  timer,
 }

@@ -126,7 +126,7 @@ Future<CappConsole> test(c) async {
       ['#', 'Name', 'Age', 'City', 'Job'],
       ['1', 'Farhad', '38', 'Amsterdam', 'Engineer'],
       ['2', 'Adrian', '25', 'Berlin', 'Teacher'],
-      ['3', 'Arian', '33', 'Frankfort0', 'Taxi driver']
+      ['3', 'Arian', '33', 'Frankfort', 'Taxi driver']
     ];
 
     CappConsole.writeTable(table);
@@ -297,7 +297,7 @@ Your selection is: Make a table
 ├───┼────────┼─────┼────────────┼─────────────┤
 │ 2 │ Adrian │ 25  │ Berlin     │ Teacher     │
 ├───┼────────┼─────┼────────────┼─────────────┤
-│ 3 │ Arian  │ 33  │ Frankfort0 │ Taxi driver │
+│ 3 │ Arian  │ 33  │ Frankfort │ Taxi driver │
 └───┴────────┴─────┴────────────┴─────────────┘
 
 ╔═══╦════════╦═════╦════════════╦═════════════╗
@@ -307,7 +307,7 @@ Your selection is: Make a table
 ╠═══╬════════╬═════╬════════════╬═════════════╣
 ║ 2 ║ Adrian ║ 25  ║ Berlin     ║ Teacher     ║
 ╠═══╬════════╬═════╬════════════╬═════════════╣
-║ 3 ║ Arian  ║ 33  ║ Frankfort0 ║ Taxi driver ║
+║ 3 ║ Arian  ║ 33  ║ Frankfort ║ Taxi driver ║
 ╚═══╩════════╩═════╩════════════╩═════════════╝
 
 

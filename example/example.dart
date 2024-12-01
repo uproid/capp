@@ -43,6 +43,7 @@ Future<CappConsole> test(CappController c) async {
     'Yes/No questions',
     'Input text',
     'Make a table',
+    'Multi Choice',
     'Clear screen',
     'Help',
     'Exit',
@@ -76,8 +77,7 @@ Future<CappConsole> test(CappController c) async {
       () async => Future.delayed(Duration(seconds: 5)),
       type: CappProgressType.spinner,
     );
-  }
-  else if (select == 'Progress timer') {
+  } else if (select == 'Progress timer') {
     await CappConsole.progress(
       'I am waiting here for 5 secounds!',
       () async => Future.delayed(Duration(seconds: 5)),
@@ -125,6 +125,22 @@ Future<CappConsole> test(CappController c) async {
   // Clear Screen
   else if (select == 'Clear screen') {
     CappConsole.clear();
+  }
+
+  // Multi chice
+  else if (select == 'Multi Choice') {
+    final res = await CappConsole.readMultiChoice(
+      'Select your favorite colors:',
+      ['Red', 'Green', 'Blue', 'Yellow', 'Black', 'White'],
+      color: CappColors.warnnig,
+      selected: ['Red', 'Blue', 'White'],
+      required: true,
+    );
+
+    CappConsole.write(
+      "Your favorite colors are: ${res.join(', ')}",
+      CappColors.success,
+    );
   }
 
   // Help

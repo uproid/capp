@@ -157,8 +157,8 @@ class CappConsole {
       int spinnerIndex = 0;
 
       if (!isWindows) {
-        stdin.echoMode = false;
         stdin.lineMode = false;
+        stdin.echoMode = false;
       }
 
       while (isLoading) {
@@ -179,8 +179,8 @@ class CappConsole {
       return result;
     } finally {
       if (!isWindows) {
-        stdin.echoMode = true;
         stdin.lineMode = true;
+        stdin.echoMode = true;
       }
       isLoading = false;
       await spinnerFuture;
@@ -303,6 +303,96 @@ class CappConsole {
     }
     border.writeln(rightChar);
     return border.toString();
+  }
+
+  static List<String> readMultiChoice(
+    String message,
+    List<String> options, {
+    List<String> selected = const [],
+    CappColors color = CappColors.none,
+    bool required = false,
+  }) {
+    int selectedIndex = 0;
+    List<bool> checked = List.filled(options.length, false);
+    for (var i = 0; i < options.length; i++) {
+      var option = options[i];
+      checked[i] = selected.contains(option);
+    }
+
+    void render([int input = -1]) {
+      // Clear the console
+      clear();
+      write(message, CappColors.info, true);
+
+      for (var i = 0; i < options.length; i++) {
+        final checkbox = checked[i] ? '[x]' : '[ ]';
+        final prefix = (i == selectedIndex) ? '> ' : '  ';
+        if ((i == selectedIndex)) {
+          write('$prefix$checkbox ${options[i]}', color);
+        } else {
+          write('$prefix$checkbox ${options[i]}', CappColors.none);
+        }
+      }
+      write(
+        '\n\nUse Arrow Keys to navigate, Space to toggle, Enter to confirm.',
+        color,
+      );
+    }
+
+    render();
+
+    stdin.lineMode = false;
+    stdin.echoMode = false;
+
+    try {
+      while (true) {
+        var input = stdin.readByteSync();
+
+        if (input == 27) {
+          // Arrow key sequence starts with ESC (27)
+          var next1 = stdin.readByteSync();
+          var next2 = stdin.readByteSync();
+
+          if (next1 == 91) {
+            if (next2 == 65) {
+              // Arrow Up
+              selectedIndex = (selectedIndex - 1) % options.length;
+              if (selectedIndex < 0) selectedIndex += options.length;
+            } else if (next2 == 66) {
+              // Arrow Down
+              selectedIndex = (selectedIndex + 1) % options.length;
+            }
+          }
+        } else if (input == 32) {
+          // Space key
+          checked[selectedIndex] = !checked[selectedIndex];
+        } else if (input == 13 || input == 10) {
+          // Enter key
+          break;
+        }
+
+        render(input);
+      }
+    } finally {
+      stdin.lineMode = true;
+      stdin.echoMode = true;
+    }
+
+    var res = [
+      for (var i = 0; i < options.length; i++)
+        if (checked[i]) options[i]
+    ];
+    if (required && res.isEmpty) {
+      return readMultiChoice(
+        message + "\n\n * At least one option is required!",
+        options,
+        selected: [],
+        color: color,
+        required: required,
+      );
+    }
+
+    return res;
   }
 }
 

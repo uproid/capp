@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 /// [CappConsole] is a class that helps you to interact with the console.
 /// Here are some Console widgets that you can use

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 /// [CappConsole] is a class that helps you to interact with the console.
 /// Here are some Console widgets that you can use
@@ -393,6 +395,28 @@ class CappConsole {
     }
 
     return res;
+  }
+
+  static void writeJson(
+    dynamic json, {
+    bool pretty = false,
+    CappColors color = CappColors.none,
+    int indent = 4,
+    String indantChar = ' ',
+  }) {
+    if (pretty) {
+      var encoder = JsonEncoder.withIndent(
+        indantChar * indent,
+        (object) {
+          return object.toString();
+        },
+      ); // Indent with two spaces
+      var res = encoder.convert(json);
+      write(res, color);
+    } else {
+      var res = jsonEncode(json);
+      write(res, color);
+    }
   }
 }
 

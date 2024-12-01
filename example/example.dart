@@ -44,6 +44,7 @@ Future<CappConsole> test(CappController c) async {
     'Input text',
     'Make a table',
     'Multi Choice',
+    'Json Viewer',
     'Clear screen',
     'Help',
     'Exit',
@@ -141,6 +142,25 @@ Future<CappConsole> test(CappController c) async {
       "Your favorite colors are: ${res.join(', ')}",
       CappColors.success,
     );
+  }
+
+  // Json Viewer
+  else if (select == 'Json Viewer') {
+    final json = {
+      'name': 'Farhad',
+      'age': 38,
+      'city': 'Amsterdam',
+      'job': 'Engineer',
+      'skills': ['Dart', 'Flutter', 'Java', 'Kotlin', 'Swift'],
+      'isMarried': true,
+      'children': [
+        {'name': 'Ali', 'age': 10},
+        {'name': 'Sara', 'age': 8},
+      ],
+      'time': DateTime.now(),
+    };
+
+    CappConsole.writeJson(json, pretty: true, color: CappColors.warnnig);
   }
 
   // Help

@@ -5,12 +5,22 @@
 
 `Capp` is a powerful Dart package designed to simplify the development of interactive console applications with features for handling user inputs, generating help information, managing arguments, and creating visually structured outputs like tables and progress indicators.
 
+## Elements
+- **Progress indicators**
+- **Yes/No input fields**  
+- **Text/Number input fields**  
+- **Multiple-choice input fields**  
+- **Multi-option selectors**  
+- **Table views**
+- **Json viewer**
+
 ## Features
 
 - **Argument and Option Management**: Define and manage command-line arguments and options easily.
 - **User Input Handling**: Supports reading user inputs with prompts and selection options.
 - **Structured Output**: Display tables, messages in color, and various progress indicators in the console.
 - **Help Generation**: Automatically generate a help guide for your console commands and options.
+
 
 ## Getting Started
 
@@ -297,7 +307,7 @@ Your selection is: Make a table
 ├───┼────────┼─────┼────────────┼─────────────┤
 │ 2 │ Adrian │ 25  │ Berlin     │ Teacher     │
 ├───┼────────┼─────┼────────────┼─────────────┤
-│ 3 │ Arian  │ 33  │ Frankfort │ Taxi driver │
+│ 3 │ Arian  │ 33  │ Frankfort  │ Taxi driver │
 └───┴────────┴─────┴────────────┴─────────────┘
 
 ╔═══╦════════╦═════╦════════════╦═════════════╗
@@ -307,7 +317,7 @@ Your selection is: Make a table
 ╠═══╬════════╬═════╬════════════╬═════════════╣
 ║ 2 ║ Adrian ║ 25  ║ Berlin     ║ Teacher     ║
 ╠═══╬════════╬═════╬════════════╬═════════════╣
-║ 3 ║ Arian  ║ 33  ║ Frankfort ║ Taxi driver ║
+║ 3 ║ Arian  ║ 33  ║ Frankfort  ║ Taxi driver ║
 ╚═══╩════════╩═════╩════════════╩═════════════╝
 
 

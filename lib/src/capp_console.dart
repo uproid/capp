@@ -30,8 +30,6 @@ class CappConsole {
         print(output);
       case CappColors.off:
         break;
-      default:
-        print(output);
     }
   }
 

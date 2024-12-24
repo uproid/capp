@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dart_console/dart_console.dart';
 
 /// [CappConsole] is a class that helps you to interact with the console.
 /// Here are some Console widgets that you can use
 class CappConsole {
+  static Console console = Console();
   dynamic output;
   CappColors color;
   bool space;
@@ -11,45 +13,52 @@ class CappConsole {
   /// [CappConsole] is a class that helps you to interact with the console.
   CappConsole(this.output, [this.color = CappColors.info, this.space = false]);
 
+  /// check is windows or not
+  static bool get isWindows => Platform.isWindows;
+
   /// [log] method is used to print the output to the console.
   log() {
     var space = this.space ? '\n\n' : '';
     switch (color) {
       case CappColors.warnnig:
-        print('\x1B[33m$space$output$space\x1B[0m');
+        console.writeLine('\x1B[33m$space$output$space\x1B[0m');
         break;
       case CappColors.error:
-        print('\x1B[31m$space$output$space\x1B[0m');
+        console.writeLine('\x1B[31m$space$output$space\x1B[0m');
         break;
       case CappColors.success:
-        print('\x1B[32m$space$output$space\x1B[0m');
+        console.writeLine('\x1B[32m$space$output$space\x1B[0m');
         break;
       case CappColors.info:
-        print('\x1B[36m$space$output$space\x1B[0m');
+        console.writeLine('\x1B[36m$space$output$space\x1B[0m');
         break;
       case CappColors.none:
-        print(output);
+        console.writeLine(output);
       case CappColors.off:
         break;
       default:
-        print(output);
+        console.writeLine(output);
     }
   }
 
   /// [write] method is used to print the output to the console.
-  static write(dynamic obj,
-      [CappColors color = CappColors.none, space = false]) {
+  static write(
+    dynamic obj, [
+    CappColors color = CappColors.none,
+    space = false,
+  ]) {
     CappConsole("${space ? '\n\n' : ''}$obj${space ? '\n\n' : ''}", color)
         .log();
   }
 
   /// [clear] method is used to clear the console screen.
   static void clear() {
-    if (Platform.isWindows) {
-      Process.runSync('cls', [], runInShell: true);
-    } else {
-      stdout.write('\x1B[2J\x1B[0;0H');
-    }
+    // if (Platform.isWindows) {
+    //   Process.runSync('cls', [], runInShell: true);
+    // } else {
+    //   stdout.write('\x1B[2J\x1B[0;0H');
+    // }
+    console.clearScreen();
   }
 
   /// [read] method is used to read the input from the console.
@@ -59,8 +68,13 @@ class CappConsole {
     bool isNumber = false,
     bool isSlug = false,
   }) {
-    stdout.write('\n\n$message ');
-    var res = stdin.readLineSync() ?? '';
+    console.write('\n\n$message ');
+    var res = '';
+    try {
+      res = console.readLine() ?? '';
+    } catch (e) {
+      res = '';
+    }
     res = res.trim();
     if (res.isEmpty && isRequired) {
       return read(
@@ -118,7 +132,6 @@ class CappConsole {
     CappProgressType type = CappProgressType.bar,
   }) async {
     bool isLoading = true;
-    bool isWindows = Platform.isWindows;
 
     Future<void> showSpinner() async {
       var startTime = DateTime.timestamp();
@@ -158,12 +171,12 @@ class CappConsole {
       int spinnerIndex = 0;
 
       if (!isWindows) {
-        stdin.lineMode = false;
-        stdin.echoMode = false;
+        // stdin.lineMode = false;
+        // stdin.echoMode = false;
       }
 
       while (isLoading) {
-        stdout.write('\r$message ${spinner(spinnerIndex)}');
+        console.write('\r$message ${spinner(spinnerIndex)}');
         if (type != CappProgressType.circle) {
           spinnerIndex = (spinnerIndex + 1) % 30;
         } else {
@@ -179,13 +192,13 @@ class CappConsole {
       T result = await action();
       return result;
     } finally {
-      if (!isWindows) {
-        stdin.lineMode = true;
-        stdin.echoMode = true;
-      }
+      // if (!isWindows) {
+      //   stdin.lineMode = true;
+      //   stdin.echoMode = true;
+      // }
       isLoading = false;
       await spinnerFuture;
-      stdout.write('\r$message\t\tDone!                            \n');
+      console.write('\r$message\t\tDone!                            \n');
     }
   }
 
@@ -199,9 +212,9 @@ class CappConsole {
     List<String> options, {
     bool isRequired = false,
   }) {
-    stdout.writeln('\n\n$message\n');
+    console.writeLine('\n\n$message\n');
     for (var i = 0; i < options.length; i++) {
-      stdout.writeln("  [${i + 1}]. ${options[i]}");
+      console.writeLine("  [${i + 1}]. ${options[i]}");
     }
 
     var res = read("Enter the number of the option:");
@@ -342,41 +355,35 @@ class CappConsole {
 
     render();
 
-    stdin.lineMode = false;
-    stdin.echoMode = false;
+    // stdin.lineMode = false;
+    // stdin.echoMode = false;
 
     try {
       while (true) {
-        var input = stdin.readByteSync();
+        var input = console.readKey();
+        //if (input.controlChar == ControlCharacter.escape) {
+        // Arrow key sequence starts with ESC (27)
 
-        if (input == 27) {
-          // Arrow key sequence starts with ESC (27)
-          var next1 = stdin.readByteSync();
-          var next2 = stdin.readByteSync();
-
-          if (next1 == 91) {
-            if (next2 == 65) {
-              // Arrow Up
-              selectedIndex = (selectedIndex - 1) % options.length;
-              if (selectedIndex < 0) selectedIndex += options.length;
-            } else if (next2 == 66) {
-              // Arrow Down
-              selectedIndex = (selectedIndex + 1) % options.length;
-            }
-          }
-        } else if (input == 32) {
+        if (input.controlChar == ControlCharacter.arrowUp) {
+          // Arrow Up
+          selectedIndex = (selectedIndex - 1) % options.length;
+          if (selectedIndex < 0) selectedIndex += options.length;
+        } else if (input.controlChar == ControlCharacter.arrowDown) {
+          // Arrow Down
+          selectedIndex = (selectedIndex + 1) % options.length;
+        } else if (input.char == " ") {
           // Space key
           checked[selectedIndex] = !checked[selectedIndex];
-        } else if (input == 13 || input == 10) {
+        } else if (input.controlChar == ControlCharacter.escape ||
+            input.controlChar == ControlCharacter.enter) {
           // Enter key
           break;
         }
-
-        render(input);
+        render(int.tryParse(input.char) ?? -1);
       }
     } finally {
-      stdin.lineMode = true;
-      stdin.echoMode = true;
+      // stdin.lineMode = true;
+      // stdin.echoMode = true;
     }
 
     var res = [

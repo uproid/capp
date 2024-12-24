@@ -28,4 +28,6 @@ environment:
 
 dev_dependencies:
   test: ^1.25.8
+dependencies: 
+  dart_console: ^4.1.1
 

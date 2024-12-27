@@ -1,3 +1,8 @@
+## 1.1.0
+- Added Json View
+- Added Menu View
+- Added Multi Choice View
+
 ## 1.0.3
 - Fixed bug
 

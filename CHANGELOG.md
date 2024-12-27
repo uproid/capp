@@ -1,3 +1,6 @@
+## 1.0.3
+- Fixed bug
+
 ## 1.0.2
 - Added Progress timer
 

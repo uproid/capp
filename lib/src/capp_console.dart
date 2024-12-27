@@ -36,8 +36,6 @@ class CappConsole {
         console.writeLine(output);
       case CappColors.off:
         break;
-      default:
-        console.writeLine(output);
     }
   }
 

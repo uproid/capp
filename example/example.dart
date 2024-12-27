@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:capp/capp.dart";
 
 void main([
@@ -45,6 +47,7 @@ Future<CappConsole> test(CappController c) async {
     'Make a table',
     'Multi Choice',
     'Json Viewer',
+    'Menu',
     'Clear screen',
     'Help',
     'Exit',
@@ -161,6 +164,23 @@ Future<CappConsole> test(CappController c) async {
     };
 
     CappConsole.writeJson(json, pretty: true, color: CappColors.warnnig);
+  }
+
+  // Menu
+  else if (select == 'Menu') {
+    final menu = {
+      'Test timer': () async => {
+            await CappConsole.progress(
+              "Test Timer",
+              () => Future.delayed(Duration(seconds: 5)),
+              type: CappProgressType.timer,
+            ),
+          },
+      'Exit app': () => exit(0),
+      'Back': () {},
+    };
+
+    await CappConsole.menuChoice("Test Menu", menu, color: CappColors.warnnig);
   }
 
   // Help

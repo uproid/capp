@@ -424,6 +424,57 @@ class CappConsole {
       write(res, color);
     }
   }
+
+  /**
+   * Menu
+   */
+  static Future<void> menuChoice(
+    message,
+    Map<String, Function> menu, {
+    CappColors color = CappColors.none,
+  }) async {
+    int selectedIndex = 0;
+
+    void render([int input = -1]) {
+      // Clear the console
+      clear();
+      write(message, CappColors.info, true);
+
+      for (var i = 0; i < menu.length; i++) {
+        if (i == selectedIndex) {
+          write(' > [${menu.keys.toList()[i]}]', CappColors.warnnig);
+        } else {
+          write('   ${menu.keys.toList()[i]}');
+        }
+      }
+      write(
+        '\n\nUse Arrow Keys to navigate, Enter to confirm.',
+        color,
+      );
+    }
+
+    render();
+
+    try {
+      while (true) {
+        var input = console.readKey();
+        if (input.controlChar == ControlCharacter.arrowUp) {
+          // Arrow Up
+          selectedIndex = (selectedIndex - 1) % menu.length;
+          if (selectedIndex < 0) selectedIndex += menu.length;
+        } else if (input.controlChar == ControlCharacter.arrowDown) {
+          // Arrow Down
+          selectedIndex = (selectedIndex + 1) % menu.length;
+        } else if (input.controlChar == ControlCharacter.enter) {
+          await menu.values.toList()[selectedIndex]();
+          break;
+        }
+        render(int.tryParse(input.char) ?? -1);
+      }
+    } catch (e) {
+      write("Error", CappColors.error);
+    }
+  }
 }
 
 /// [CappColors] is an enum that contains the colors that can be used in the console.

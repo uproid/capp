@@ -20,7 +20,9 @@ class CappConsole {
   log() {
     var space = this.space ? '\n\n' : '';
     switch (color) {
+      // ignore: deprecated_member_use_from_same_package
       case CappColors.warnnig:
+      case CappColors.warning:
         console.writeLine('\x1B[33m$space$output$space\x1B[0m');
         break;
       case CappColors.error:
@@ -440,7 +442,7 @@ class CappConsole {
 
       for (var i = 0; i < menu.length; i++) {
         if (i == selectedIndex) {
-          write(' > [${menu.keys.toList()[i]}]', CappColors.warnnig);
+          write(' > [${menu.keys.toList()[i]}]', CappColors.warning);
         } else {
           write('   ${menu.keys.toList()[i]}');
         }
@@ -479,7 +481,9 @@ class CappConsole {
 /// The colors are none, warning, error, success, info, and off.
 enum CappColors {
   none,
+  @deprecated
   warnnig,
+  warning,
   error,
   success,
   info,

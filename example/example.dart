@@ -93,7 +93,7 @@ Future<CappConsole> test(CappController c) async {
     final res = await CappConsole.yesNo('Do you agree? ');
     CappConsole.write(
       "Your answer is ${res ? 'YES' : 'NO'}",
-      CappColors.warnnig,
+      CappColors.warning,
     );
   }
   // Input text
@@ -122,7 +122,7 @@ Future<CappConsole> test(CappController c) async {
 
     CappConsole.writeTable(
       table,
-      color: CappColors.warnnig,
+      color: CappColors.warning,
       dubleBorder: true,
     );
   }
@@ -136,7 +136,7 @@ Future<CappConsole> test(CappController c) async {
     final res = await CappConsole.readMultiChoice(
       'Select your favorite colors:',
       ['Red', 'Green', 'Blue', 'Yellow', 'Black', 'White'],
-      color: CappColors.warnnig,
+      color: CappColors.warning,
       selected: ['Red', 'Blue', 'White'],
       required: true,
     );
@@ -163,7 +163,7 @@ Future<CappConsole> test(CappController c) async {
       'time': DateTime.now(),
     };
 
-    CappConsole.writeJson(json, pretty: true, color: CappColors.warnnig);
+    CappConsole.writeJson(json, pretty: true, color: CappColors.warning);
   }
 
   // Menu
@@ -180,7 +180,7 @@ Future<CappConsole> test(CappController c) async {
       'Back': () {},
     };
 
-    await CappConsole.menuChoice("Test Menu", menu, color: CappColors.warnnig);
+    await CappConsole.menuChoice("Test Menu", menu, color: CappColors.warning);
   }
 
   // Help

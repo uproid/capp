@@ -1,3 +1,6 @@
+## 1.0.1
+- Fixes #1 warning color
+
 ## 1.1.0
 - Added Json View
 - Added Menu View

@@ -114,7 +114,7 @@ Future<CappConsole> test(c) async {
     final res = await CappConsole.yesNo('Do you agree? ');
     CappConsole.write(
       "Your answer is ${res ? 'YES' : 'NO'}",
-      CappColors.warnnig,
+      CappColors.warning,
     );
   }
   // Input text
@@ -143,7 +143,7 @@ Future<CappConsole> test(c) async {
 
     CappConsole.writeTable(
       table,
-      color: CappColors.warnnig,
+      color: CappColors.warning,
       dubleBorder: true,
     );
   }

@@ -64,7 +64,7 @@ class CappManager {
     } catch (e) {
       CappConsole.write("Error: ${e.toString()}", CappColors.error);
     }
-    CappConsole.write(getHelp(), CappColors.warnnig);
+    CappConsole.write(getHelp(), CappColors.warning);
   }
 
   /// The [getHelp] method is used to get the help of the application.

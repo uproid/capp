@@ -1,4 +1,7 @@
-## 1.0.1
+## 1.1.2
+- Added `processWhile` to keep the app running while receiving new commands, check `example_app.dart`
+
+## 1.1.1
 - Fixes #1 warning color
 
 ## 1.1.0

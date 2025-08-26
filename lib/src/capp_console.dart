@@ -16,8 +16,10 @@ class CappConsole {
   /// check is windows or not
   static bool get isWindows => Platform.isWindows;
 
+  static CappConsole get empty => CappConsole('');
+
   /// [log] method is used to print the output to the console.
-  log() {
+  CappConsole log() {
     var space = this.space ? '\n\n' : '';
     switch (color) {
       // ignore: deprecated_member_use_from_same_package
@@ -39,15 +41,18 @@ class CappConsole {
       case CappColors.off:
         break;
     }
+
+    return this;
   }
 
   /// [write] method is used to print the output to the console.
-  static write(
+  static CappConsole write(
     dynamic obj, [
     CappColors color = CappColors.none,
     space = false,
   ]) {
-    CappConsole("${space ? '\n\n' : ''}$obj${space ? '\n\n' : ''}", color)
+    return CappConsole(
+            "${space ? '\n\n' : ''}$obj${space ? '\n\n' : ''}", color)
         .log();
   }
 
@@ -247,7 +252,7 @@ class CappConsole {
   /// The [data] is the list of lists of strings that will be shown in the table.
   /// The [dubleBorder] is a boolean that indicates if the table has a double border or not.
   /// The [color] is the color of the table.
-  static void writeTable(
+  static CappConsole writeTable(
     List<List<String>> data, {
     bool dubleBorder = false,
     CappColors color = CappColors.error,
@@ -288,7 +293,7 @@ class CappConsole {
     }
 
     res += _printBorder(columnWidths, set[8], set[10], true, false, set);
-    write(res, color);
+    return write(res, color);
   }
 
   static String _printBorder(
@@ -403,7 +408,7 @@ class CappConsole {
     return res;
   }
 
-  static void writeJson(
+  static CappConsole writeJson(
     dynamic json, {
     bool pretty = false,
     CappColors color = CappColors.none,
@@ -418,10 +423,10 @@ class CappConsole {
         },
       ); // Indent with two spaces
       var res = encoder.convert(json);
-      write(res, color);
+      return write(res, color);
     } else {
       var res = jsonEncode(json);
-      write(res, color);
+      return write(res, color);
     }
   }
 

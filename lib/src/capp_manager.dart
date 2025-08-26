@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'capp_controller.dart';
 import 'capp_console.dart';
 import 'capp_option.dart';
@@ -26,7 +29,7 @@ class CappManager {
 
   /// The [process] method is used to process the arguments and call the controllers.
   /// Call this function to start the application.
-  void process() async {
+  Future<void> process() async {
     if (args.isEmpty) {
       main.init(manager: this);
       var res = await main.run(main);
@@ -65,6 +68,29 @@ class CappManager {
       CappConsole.write("Error: ${e.toString()}", CappColors.error);
     }
     CappConsole.write(getHelp(), CappColors.warning);
+  }
+
+  Future processWhile({
+    String promptLabel = 'App> ',
+    List<String>? initArgs,
+  }) async {
+    if (initArgs != null && initArgs.length > 0) {
+      args = initArgs;
+      await process();
+    }
+
+    final input = stdin.transform(utf8.decoder);
+    stdout.write(promptLabel);
+
+    await for (String line in input.transform(LineSplitter())) {
+      line = line.trim();
+      line = line.replaceAll(RegExp('  '), ' ');
+      if (line.isNotEmpty) {
+        args = line.split(' ');
+        await process();
+      }
+      stdout.write(promptLabel);
+    }
   }
 
   /// The [getHelp] method is used to get the help of the application.

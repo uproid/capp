@@ -486,7 +486,7 @@ class CappConsole {
 /// The colors are none, warning, error, success, info, and off.
 enum CappColors {
   none,
-  @deprecated
+  @Deprecated('Use warning instead')
   warnnig,
   warning,
   error,

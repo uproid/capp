@@ -74,7 +74,7 @@ class CappManager {
     String promptLabel = 'App> ',
     List<String>? initArgs,
   }) async {
-    if (initArgs != null && initArgs.length > 0) {
+    if (initArgs != null && initArgs.isNotEmpty) {
       args = initArgs;
       await process();
     }

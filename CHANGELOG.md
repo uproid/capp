@@ -1,3 +1,10 @@
+
+## 1.1.3
+- Added `_readKey` method to handle key inputs
+- Supported arguments with `=` in the `_findOptionValue` method, allowing options to be passed as `--option=value` or `-o=value`
+- Added `writeHelpModern` method to display help in a more modern and colorful way using ANSI escape codes
+- Supported breaking the loop in `processWhile` by pressing the 'q' key, allowing users to exit the command processing loop gracefully while still receiving new commands
+  
 ## 1.1.2
 - Added `processWhile` to keep the app running while receiving new commands, check `example_app.dart`
 

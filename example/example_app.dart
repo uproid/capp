@@ -7,7 +7,7 @@ void main(List<String> args) async {
     main: CappController(
       'help',
       options: [],
-      run: (c) async => CappConsole(c.manager.getHelp()),
+      run: (c) async => c.manager.writeHelpModern(),
       description: 'Show commands help',
     ),
     args: args,

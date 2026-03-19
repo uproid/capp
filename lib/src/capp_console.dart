@@ -1,11 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:dart_console/dart_console.dart';
+
+enum ControlCharacter {
+  none,
+  arrowUp,
+  arrowDown,
+  arrowLeft,
+  arrowRight,
+  enter,
+  escape,
+  ctrlC,
+}
+
+class Key {
+  final String char;
+  final ControlCharacter controlChar;
+  Key(this.char, this.controlChar);
+}
 
 /// [CappConsole] is a class that helps you to interact with the console.
 /// Here are some Console widgets that you can use
 class CappConsole {
-  static Console console = Console();
   dynamic output;
   CappColors color;
   bool space;
@@ -22,22 +37,20 @@ class CappConsole {
   CappConsole log() {
     var space = this.space ? '\n\n' : '';
     switch (color) {
-      // ignore: deprecated_member_use_from_same_package
-      case CappColors.warnnig:
       case CappColors.warning:
-        console.writeLine('\x1B[33m$space$output$space\x1B[0m');
+        stdout.writeln('\x1B[33m$space$output$space\x1B[0m');
         break;
       case CappColors.error:
-        console.writeLine('\x1B[31m$space$output$space\x1B[0m');
+        stdout.writeln('\x1B[31m$space$output$space\x1B[0m');
         break;
       case CappColors.success:
-        console.writeLine('\x1B[32m$space$output$space\x1B[0m');
+        stdout.writeln('\x1B[32m$space$output$space\x1B[0m');
         break;
       case CappColors.info:
-        console.writeLine('\x1B[36m$space$output$space\x1B[0m');
+        stdout.writeln('\x1B[36m$space$output$space\x1B[0m');
         break;
       case CappColors.none:
-        console.writeLine(output);
+        stdout.writeln(output);
       case CappColors.off:
         break;
     }
@@ -63,7 +76,7 @@ class CappConsole {
     // } else {
     //   stdout.write('\x1B[2J\x1B[0;0H');
     // }
-    console.clearScreen();
+    stdout.write('\x1B[2J\x1B[0;0H');
   }
 
   /// [read] method is used to read the input from the console.
@@ -72,21 +85,26 @@ class CappConsole {
     bool isRequired = false,
     bool isNumber = false,
     bool isSlug = false,
+    bool canBreak = true,
   }) {
-    console.write('\n\n$message ');
+    stdout.write('\n\n$message ');
     var res = '';
     try {
-      res = console.readLine() ?? '';
+      var line = stdin.readLineSync();
+      if (line == null && canBreak) exit(0);
+      res = line ?? '';
     } catch (e) {
-      res = '';
+      if (canBreak) exit(0);
+      res = 'error';
     }
-    res = res.trim();
+
     if (res.isEmpty && isRequired) {
       return read(
         message,
         isRequired: isRequired,
         isNumber: isNumber,
         isSlug: isSlug,
+        canBreak: canBreak,
       );
     }
 
@@ -181,7 +199,7 @@ class CappConsole {
       }
 
       while (isLoading) {
-        console.write('\r$message ${spinner(spinnerIndex)}');
+        stdout.write('\r$message ${spinner(spinnerIndex)}');
         if (type != CappProgressType.circle) {
           spinnerIndex = (spinnerIndex + 1) % 30;
         } else {
@@ -203,7 +221,7 @@ class CappConsole {
       // }
       isLoading = false;
       await spinnerFuture;
-      console.write('\r$message\t\tDone!                            \n');
+      stdout.write('\r$message\t\tDone!                            \n');
     }
   }
 
@@ -217,9 +235,9 @@ class CappConsole {
     List<String> options, {
     bool isRequired = false,
   }) {
-    console.writeLine('\n\n$message\n');
+    stdout.writeln('\n\n$message\n');
     for (var i = 0; i < options.length; i++) {
-      console.writeLine("  [${i + 1}]. ${options[i]}");
+      stdout.writeln("  [${i + 1}]. ${options[i]}");
     }
 
     var res = read("Enter the number of the option:");
@@ -236,15 +254,18 @@ class CappConsole {
   /// The [message] is the message that will be shown in the console.
   /// The method returns a boolean value.
   /// If the answer is yes, it returns true.
-  static bool yesNo(String message) {
-    var res = read("$message (y/n):");
+  static bool yesNo(
+    String message, {
+    bool canBreak = true,
+  }) {
+    var res = read("$message (y/n):", canBreak: canBreak);
     if (res.toLowerCase() == 'yes' || res.toLowerCase() == 'y') {
       return true;
     } else if (res.toLowerCase() == 'no' || res.toLowerCase() == 'n') {
       return false;
     } else {
       write("Invalid option!", CappColors.error);
-      return yesNo(message);
+      return yesNo(message, canBreak: canBreak);
     }
   }
 
@@ -365,7 +386,7 @@ class CappConsole {
 
     try {
       while (true) {
-        var input = console.readKey();
+        var input = _readKey();
         //if (input.controlChar == ControlCharacter.escape) {
         // Arrow key sequence starts with ESC (27)
 
@@ -434,9 +455,10 @@ class CappConsole {
    * Menu
    */
   static Future<void> menuChoice(
-    message,
+    dynamic message,
     Map<String, Function> menu, {
     CappColors color = CappColors.none,
+    bool canBreak = true,
   }) async {
     int selectedIndex = 0;
 
@@ -462,7 +484,10 @@ class CappConsole {
 
     try {
       while (true) {
-        var input = console.readKey();
+        var input = _readKey();
+        if (canBreak && input.controlChar == ControlCharacter.ctrlC) {
+          exit(0);
+        }
         if (input.controlChar == ControlCharacter.arrowUp) {
           // Arrow Up
           selectedIndex = (selectedIndex - 1) % menu.length;
@@ -477,7 +502,37 @@ class CappConsole {
         render(int.tryParse(input.char) ?? -1);
       }
     } catch (e) {
+      if (canBreak) exit(0);
       write("Error", CappColors.error);
+    }
+  }
+
+  static Key _readKey() {
+    stdin.lineMode = false;
+    stdin.echoMode = false;
+    try {
+      int byte = stdin.readByteSync();
+      if (byte == 3) {
+        return Key('', ControlCharacter.ctrlC);
+      } else if (byte == 13 || byte == 10) {
+        return Key('', ControlCharacter.enter);
+      } else if (byte == 27) {
+        int next1 = stdin.readByteSync();
+        if (next1 == 91) {
+          int next2 = stdin.readByteSync();
+          if (next2 == 65) return Key('', ControlCharacter.arrowUp);
+          if (next2 == 66) return Key('', ControlCharacter.arrowDown);
+          if (next2 == 67) return Key('', ControlCharacter.arrowRight);
+          if (next2 == 68) return Key('', ControlCharacter.arrowLeft);
+        }
+        return Key('', ControlCharacter.escape);
+      }
+      return Key(String.fromCharCode(byte), ControlCharacter.none);
+    } catch (e) {
+      return Key('', ControlCharacter.none);
+    } finally {
+      stdin.lineMode = true;
+      stdin.echoMode = true;
     }
   }
 }
@@ -486,8 +541,6 @@ class CappConsole {
 /// The colors are none, warning, error, success, info, and off.
 enum CappColors {
   none,
-  @Deprecated('Use warning instead')
-  warnnig,
   warning,
   error,
   success,

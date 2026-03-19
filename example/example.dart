@@ -17,7 +17,7 @@ void main([
       ],
       run: (c) async {
         if (c.existsOption('help')) {
-          return CappConsole(c.manager.getHelp());
+          return c.manager.writeHelpModern();
         } else {
           return test(c);
         }
@@ -185,7 +185,7 @@ Future<CappConsole> test(CappController c) async {
 
   // Help
   else if (select == 'Help') {
-    CappConsole.write(c.manager.getHelp());
+    c.manager.writeHelpModern();
   } else if (select == options.last) {
     return CappConsole('Exit!');
   }

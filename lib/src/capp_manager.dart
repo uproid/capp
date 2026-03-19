@@ -67,7 +67,7 @@ class CappManager {
     } catch (e) {
       CappConsole.write("Error: ${e.toString()}", CappColors.error);
     }
-    CappConsole.write(getHelp(), CappColors.warning);
+    writeHelpModern();
   }
 
   Future processWhile({
@@ -133,7 +133,9 @@ class CappManager {
   }
 
   ({String value, bool exist}) _findOptionValue(
-      List<String> args, CappOption option) {
+    List<String> args,
+    CappOption option,
+  ) {
     var exist = false;
     for (var i = 0; i < args.length; i++) {
       var arg = args[i];
@@ -148,7 +150,65 @@ class CappManager {
           }
         }
       }
+
+      if (arg.contains('=')) {
+        var parts = arg.split('=');
+        if (parts[0] == '--${option.name}' ||
+            parts[0] == '-${option.shortName}') {
+          return (value: parts[1], exist: true);
+        }
+      }
     }
     return (value: option.value, exist: exist);
+  }
+
+  static void cprint(String text, [CappColors color = CappColors.none]) {
+    switch (color) {
+      case CappColors.warning:
+        print('\x1B[33m$text\x1B[0m');
+      case CappColors.error:
+        print('\x1B[31m$text\x1B[0m');
+      case CappColors.success:
+        print('\x1B[32m$text\x1B[0m');
+      case CappColors.info:
+        print('\x1B[36m$text\x1B[0m');
+      default:
+        print(text);
+    }
+  }
+
+  /// The [writeHelpModern] method is used to write the help of the application in a modern way.
+  /// The [myControllers] is a list of controllers that you want to show in the
+  /// help. If it is null it will show all controllers.
+  /// you can call this method from the controller to write the help of the application in a modern way.
+  /// This method uses ANSI escape codes to color the output and make it more readable.
+  CappConsole writeHelpModern([List<CappController>? myControllers]) {
+    var selectedControllers = myControllers ?? [...controllers, main];
+
+    var maxNameLen = 0;
+    for (var controller in selectedControllers) {
+      for (var option in controller.options) {
+        if (option.name.length > maxNameLen) {
+          maxNameLen = option.name.length;
+        }
+      }
+    }
+
+    for (var controller in selectedControllers) {
+      if (controller.name.isNotEmpty) {
+        cprint("\x1B[1m✔ ${controller.name}\x1B[22m", CappColors.success);
+        if (controller.description.isNotEmpty) {
+          cprint("\t${controller.description}", CappColors.warning);
+        }
+      } else {
+        cprint(controller.description, CappColors.info);
+      }
+      for (var option in controller.options) {
+        var nameCol = '--${option.name}'.padRight(maxNameLen + 2);
+        cprint("\t-${option.shortName}, $nameCol ${option.description}");
+      }
+    }
+
+    return CappConsole('');
   }
 }

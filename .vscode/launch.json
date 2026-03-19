@@ -15,6 +15,17 @@
             "cwd": "${workspaceFolder}",
             "env": {
             }
+        },
+        {
+            "name": "capp App",
+            "request": "launch",
+            "type": "dart",
+            "console": "terminal",
+            "program": "example/example_app.dart",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {
+            }
         }
     ]
 }

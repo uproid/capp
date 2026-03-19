@@ -36,7 +36,7 @@ class CappController {
   });
 
   /// The [init] method is used to initialize the controller.
-  init({required CappManager manager}) {
+  void init({required CappManager manager}) {
     this.manager = manager;
   }
 

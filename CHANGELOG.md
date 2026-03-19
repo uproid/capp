@@ -1,5 +1,5 @@
 
-## 1.1.3
+## 1.1.4
 - Added `_readKey` method to handle key inputs
 - Supported arguments with `=` in the `_findOptionValue` method, allowing options to be passed as `--option=value` or `-o=value`
 - Added `writeHelpModern` method to display help in a more modern and colorful way using ANSI escape codes

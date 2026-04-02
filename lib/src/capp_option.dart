@@ -1,6 +1,6 @@
 import 'package:capp/capp.dart';
 
-typedef bool CaptionEvent(CappController controller);
+typedef CaptionEvent = bool Function(CappController controller);
 
 /// CappOption class is a class that represents an option in the console application.
 class CappOption {

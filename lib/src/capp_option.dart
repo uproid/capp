@@ -1,3 +1,7 @@
+import 'package:capp/capp.dart';
+
+typedef bool CaptionEvent(CappController controller);
+
 /// CappOption class is a class that represents an option in the console application.
 class CappOption {
   /// The name of the option it will be used to call the option from the console.
@@ -20,14 +24,23 @@ class CappOption {
   /// [existsInArgs] is a boolean value that represents if the option exists in the arguments or not.
   bool existsInArgs = false;
 
+  /// [hideInHelp] is a boolean value that represents if the option should be hidden in the help command or not.
+  bool hideInHelp;
+
+  /// The [CappOption] constructor is used to create an instance of the [CappOption] class.
+  CaptionEvent? onSelect;
+
   /// The constructor of the CappOption class.
   /// The [name] is the name of the option.
   /// The [description] is the description of the option.
   /// The [value] is the value of the option.
   /// The [shortName] is the short name of the option.
-  CappOption(
-      {required this.name,
-      this.description = '',
-      this.value = '',
-      this.shortName = ''});
+  CappOption({
+    required this.name,
+    this.description = '',
+    this.value = '',
+    this.shortName = '',
+    this.hideInHelp = false,
+    this.onSelect,
+  });
 }

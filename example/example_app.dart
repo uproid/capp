@@ -3,10 +3,21 @@ import 'dart:io';
 import 'package:capp/capp.dart';
 
 void main(List<String> args) async {
+  var helpOption = CappOption(
+    name: 'help',
+    shortName: 'h',
+    description: 'Show help for this command',
+    hideInHelp: true,
+    onSelect: (controller) {
+      controller.writeHelp();
+      return false;
+    },
+  );
+
   CappManager capp = CappManager(
     main: CappController(
       'help',
-      options: [],
+      options: [helpOption],
       run: (c) async => c.manager.writeHelpModern(),
       description: 'Show commands help',
     ),
@@ -21,6 +32,7 @@ void main(List<String> args) async {
             shortName: 'q',
             description: 'Quit after test',
           ),
+          helpOption,
         ],
         run: (c) async {
           CappConsole.write(
@@ -38,7 +50,7 @@ void main(List<String> args) async {
       CappController(
         'exit',
         description: 'Exit the application',
-        options: [],
+        options: [helpOption],
         run: (c) async => exit(0),
       ),
     ],

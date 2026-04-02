@@ -46,6 +46,13 @@ class CappManager {
             final find = _findOptionValue(args, option);
             option.value = find.value;
             option.existsInArgs = find.exist;
+            if (controller.existsOption(option.name) &&
+                option.onSelect != null) {
+              var res = option.onSelect!(controller);
+              if (!res) {
+                return;
+              }
+            }
           }
 
           var res = await controller.run(controller);
@@ -188,6 +195,9 @@ class CappManager {
     var maxNameLen = 0;
     for (var controller in selectedControllers) {
       for (var option in controller.options) {
+        if (option.hideInHelp) {
+          continue;
+        }
         if (option.name.length > maxNameLen) {
           maxNameLen = option.name.length;
         }
@@ -204,6 +214,9 @@ class CappManager {
         cprint(controller.description, CappColors.info);
       }
       for (var option in controller.options) {
+        if (option.hideInHelp) {
+          continue;
+        }
         var nameCol = '--${option.name}'.padRight(maxNameLen + 2);
         cprint("\t-${option.shortName}, $nameCol ${option.description}");
       }

@@ -59,4 +59,8 @@ class CappController {
     }
     return false;
   }
+
+  void writeHelp() {
+    manager.writeHelpModern([this]);
+  }
 }

@@ -1,4 +1,4 @@
-## 1.1.5
+## 1.1.6
 - Added `onSelect` callback to `CappOption` to allow executing a function when an option is selected, even if it doesn't have a command associated with it. This is useful for options that are meant to trigger an action without requiring additional input, such as displaying help or toggling a setting.
 
 ## 1.1.4

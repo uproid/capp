@@ -32,9 +32,18 @@ void main(List<String> args) async {
             shortName: 'q',
             description: 'Quit after test',
           ),
+          CappOption(
+            name: 'print',
+            shortName: 'p',
+            description: 'A value to print after test',
+            value: "Default value",
+          ),
           helpOption,
         ],
         run: (c) async {
+          if (c.existsOption('print')) {
+            print(c.getOption('print', def: 'no value'));
+          }
           CappConsole.write(
             "Test ${DateTime.now()}",
             CappColors.success,

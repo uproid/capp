@@ -43,6 +43,7 @@ class CappManager {
 
         if (controller.name == args[0]) {
           for (var option in controller.options) {
+            option.resetValue();
             final find = _findOptionValue(args, option);
             option.value = find.value;
             option.existsInArgs = find.exist;
@@ -63,6 +64,7 @@ class CappManager {
 
       main.init(manager: this);
       for (var option in main.options) {
+        option.resetValue();
         final find = _findOptionValue(args, option);
         option.value = find.value;
         option.existsInArgs = find.exist;

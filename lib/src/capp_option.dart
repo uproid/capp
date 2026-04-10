@@ -19,7 +19,9 @@ class CappOption {
 
   /// The value of the option it will be used to store the value of the option.
   /// The value can be empty or have a value.
+  /// Default value is empty string.
   String value;
+  String _defaultValue = '';
 
   /// [existsInArgs] is a boolean value that represents if the option exists in the arguments or not.
   bool existsInArgs = false;
@@ -42,5 +44,13 @@ class CappOption {
     this.shortName = '',
     this.hideInHelp = false,
     this.onSelect,
-  });
+  }) {
+    _defaultValue = value;
+  }
+
+  /// The [resetValue] method is used to reset the value of the option to the default value.
+  void resetValue() {
+    value = _defaultValue;
+    existsInArgs = false;
+  }
 }

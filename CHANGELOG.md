@@ -1,3 +1,6 @@
+## 1.1.7
+- Added `resetValue` method to `CappOption` to reset the option's value to its default value and set `existsInArgs` to false. This allows for easier reuse of options across multiple command executions without retaining previous values, ensuring that each command starts with a clean slate for its options. The `resetValue` method is called in the `CappManager` before processing each command to ensure that options are reset before being populated with new values from the command arguments.
+
 ## 1.1.6
 - Added `onSelect` callback to `CappOption` to allow executing a function when an option is selected, even if it doesn't have a command associated with it. This is useful for options that are meant to trigger an action without requiring additional input, such as displaying help or toggling a setting.
 

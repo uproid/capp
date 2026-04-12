@@ -25,6 +25,22 @@ class CappConsole {
   CappColors color;
   bool space;
 
+  /// Shared buffer and prompt label used by raw mode input.
+  static StringBuffer? _activeBuffer;
+  static String _activePromptLabel = '';
+
+  /// Sets the active buffer and prompt label for raw mode.
+  static void setActiveBuffer(StringBuffer buffer, String promptLabel) {
+    _activeBuffer = buffer;
+    _activePromptLabel = promptLabel;
+  }
+
+  /// Clears the active buffer reference.
+  static void clearActiveBuffer() {
+    _activeBuffer = null;
+    _activePromptLabel = '';
+  }
+
   /// [CappConsole] is a class that helps you to interact with the console.
   CappConsole(this.output, [this.color = CappColors.info, this.space = false]);
 
@@ -534,6 +550,30 @@ class CappConsole {
       stdin.lineMode = true;
       stdin.echoMode = true;
     }
+  }
+
+  static Future<int> eventListen() {
+    return stdin
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((line) => line.codeUnits.isNotEmpty ? line.codeUnitAt(0) : 0)
+        .firstWhere((code) => code != 0);
+  }
+
+  /// Clears the current command bar text and redraws the prompt.
+  static void removeCommandBar() {
+    if (_activeBuffer == null) return;
+    var len = _activeBuffer!.length;
+    // Move cursor back, overwrite with spaces, move back again
+    stdout.write('\r${_activePromptLabel}${' ' * len}\r${_activePromptLabel}');
+    _activeBuffer!.clear();
+  }
+
+  /// Appends [text] to the command bar, updating both the display and the buffer.
+  static void addToCommandBar(String text) {
+    if (_activeBuffer == null) return;
+    _activeBuffer!.write(text);
+    stdout.write(text);
   }
 }
 

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:capp/capp.dart';
 
 void main(List<String> args) async {
+  int historyIndex = 0;
+
   var helpOption = CappOption(
     name: 'help',
     shortName: 'h',
@@ -22,6 +24,25 @@ void main(List<String> args) async {
       description: 'Show commands help',
     ),
     args: args,
+    onKeyPress: (key, manager) {
+      if (key.controlChar == ControlCharacter.enter) {
+        historyIndex = 0;
+      }
+
+      if (key.controlChar == ControlCharacter.arrowUp &&
+          historyIndex < manager.history.length) {
+        historyIndex++;
+        var command = manager.history[manager.history.length - historyIndex];
+        CappConsole.removeCommandBar();
+        CappConsole.addToCommandBar(command.join(' '));
+      } else if (key.controlChar == ControlCharacter.arrowDown &&
+          historyIndex > 1) {
+        historyIndex--;
+        var command = manager.history[manager.history.length - historyIndex];
+        CappConsole.removeCommandBar();
+        CappConsole.addToCommandBar(command.join(' '));
+      }
+    },
     controllers: [
       CappController(
         'test',
@@ -66,7 +87,13 @@ void main(List<String> args) async {
   );
 
   await capp.processWhile(
-    promptLabel: 'APP > ',
+    appLabel: () {
+      var now = DateTime.now();
+      String formattedTime = "${now.hour.toString().padLeft(2, '0')}:"
+          "${now.minute.toString().padLeft(2, '0')}:"
+          "${now.second.toString().padLeft(2, '0')}";
+      return "$formattedTime App> ";
+    },
     initArgs: args,
   );
 }

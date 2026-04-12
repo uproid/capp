@@ -1,3 +1,11 @@
+## 1.1.8
+- Added command history tracking to `CappManager`, allowing navigation through previously entered commands using arrow keys
+- Added `onKeyPress` callback to `CappManager` for handling raw mode key events, enabling custom key bindings
+- Added dynamic `appLabel` parameter to `processWhile` (replaces deprecated `promptLabel`), allowing prompt labels that update on each iteration (e.g., showing current time)
+- Added `removeCommandBar` and `addToCommandBar` static methods to `CappConsole` for manipulating the command bar text in raw mode
+- Added `eventListen` method to `CappConsole` for stdin event listening
+- Updated `example_app.dart` to demonstrate command history navigation and dynamic prompt labels
+
 ## 1.1.7
 - Added `resetValue` method to `CappOption` to reset the option's value to its default value and set `existsInArgs` to false. This allows for easier reuse of options across multiple command executions without retaining previous values, ensuring that each command starts with a clean slate for its options. The `resetValue` method is called in the `CappManager` before processing each command to ensure that options are reset before being populated with new values from the command arguments.
 

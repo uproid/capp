@@ -8,6 +8,9 @@ import 'capp_option.dart';
 /// [CappManager] is a class that represents the manager of the console application.
 /// The manager is a class that contains the main logic of the application.
 class CappManager {
+  // History of commands entered by the user. Each entry is a list of strings representing the command and its arguments.
+  var history = <List<String>>[];
+
   /// [controllers] contin all contin all CappControllers that you can use in the app
   List<CappController> controllers;
 
@@ -17,6 +20,8 @@ class CappManager {
   /// [main] is the main controller of the application. when the application starts the main controller will be called.
   CappController main;
 
+  Function(Key key, CappManager manager)? onKeyPress;
+
   /// The constructor of the CappManager class.
   /// The [main] is the main controller of the application.
   /// The [args] is a list of arguments that passed to the application from the console.
@@ -25,6 +30,7 @@ class CappManager {
     required this.main,
     required this.args,
     required this.controllers,
+    this.onKeyPress,
   });
 
   /// The [process] method is used to process the arguments and call the controllers.
@@ -35,6 +41,12 @@ class CappManager {
       var res = await main.run(main);
       res.log();
       return;
+    }
+
+    if (history.isEmpty) {
+      history.add(args);
+    } else if (history.last.join(' ') != args.join(' ')) {
+      history.add(args);
     }
 
     try {
@@ -80,16 +92,34 @@ class CappManager {
   }
 
   Future processWhile({
-    String promptLabel = 'App> ',
+    @Deprecated('Use appLabel instead') String promptLabel = 'App> ',
+
+    /// [appLabel] is a function that returns the label of the prompt.
+    /// It will be called before each prompt.
+    /// You can use it to show dynamic labels.
+    String Function()? appLabel,
     List<String>? initArgs,
   }) async {
+    if (appLabel == null) {
+      appLabel = () => promptLabel;
+    } else {
+      promptLabel = appLabel();
+    }
     if (initArgs != null && initArgs.isNotEmpty) {
       args = initArgs;
       await process();
     }
 
+    if (onKeyPress != null) {
+      await _processWhileRaw(appLabel);
+    } else {
+      await _processWhileLine(appLabel);
+    }
+  }
+
+  Future _processWhileLine(String Function() appLabel) async {
     final input = stdin.transform(utf8.decoder);
-    stdout.write(promptLabel);
+    stdout.write(appLabel());
 
     await for (String line in input.transform(LineSplitter())) {
       line = line.trim();
@@ -98,8 +128,81 @@ class CappManager {
         args = line.split(' ');
         await process();
       }
-      stdout.write(promptLabel);
+      stdout.write(appLabel());
     }
+  }
+
+  Future _processWhileRaw(String Function() appLabel) async {
+    stdin.lineMode = false;
+    stdin.echoMode = false;
+
+    try {
+      var buffer = StringBuffer();
+      CappConsole.setActiveBuffer(buffer, appLabel());
+      stdout.write(appLabel());
+
+      while (true) {
+        int byte = stdin.readByteSync();
+        if (byte < 0) break;
+
+        var key = _parseKey(byte);
+        onKeyPress!(key, this);
+
+        if (key.controlChar == ControlCharacter.ctrlC) {
+          stdout.writeln();
+          break;
+        } else if (key.controlChar == ControlCharacter.enter) {
+          stdout.writeln();
+          var line = buffer.toString().trim().replaceAll(RegExp('  '), ' ');
+          buffer.clear();
+          if (line.isNotEmpty) {
+            // Restore line mode for command processing output
+            stdin.lineMode = true;
+            stdin.echoMode = true;
+            args = line.split(' ');
+            await process();
+            stdin.lineMode = false;
+            stdin.echoMode = false;
+          }
+          stdout.write(appLabel());
+        } else if (byte == 127 || byte == 8) {
+          // Backspace
+          if (buffer.isNotEmpty) {
+            var str = buffer.toString();
+            buffer.clear();
+            buffer.write(str.substring(0, str.length - 1));
+            stdout.write('\b \b');
+          }
+        } else if (key.controlChar == ControlCharacter.none && byte >= 32) {
+          // Printable character
+          buffer.write(key.char);
+          stdout.write(key.char);
+        }
+      }
+    } finally {
+      CappConsole.clearActiveBuffer();
+      stdin.lineMode = true;
+      stdin.echoMode = true;
+    }
+  }
+
+  Key _parseKey(int byte) {
+    if (byte == 3) {
+      return Key('', ControlCharacter.ctrlC);
+    } else if (byte == 13 || byte == 10) {
+      return Key('', ControlCharacter.enter);
+    } else if (byte == 27) {
+      int next1 = stdin.readByteSync();
+      if (next1 == 91) {
+        int next2 = stdin.readByteSync();
+        if (next2 == 65) return Key('', ControlCharacter.arrowUp);
+        if (next2 == 66) return Key('', ControlCharacter.arrowDown);
+        if (next2 == 67) return Key('', ControlCharacter.arrowRight);
+        if (next2 == 68) return Key('', ControlCharacter.arrowLeft);
+      }
+      return Key('', ControlCharacter.escape);
+    }
+    return Key(String.fromCharCode(byte), ControlCharacter.none);
   }
 
   /// The [getHelp] method is used to get the help of the application.

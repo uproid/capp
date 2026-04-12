@@ -2,6 +2,7 @@ import 'package:test/test.dart';
 import 'package:capp/capp.dart';
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 void main() {
   group('CappManager Tests', () {
@@ -210,6 +211,82 @@ void main() {
       var option = CappOption(
           name: 'hidden', shortName: 'h', description: '', hideInHelp: true);
       expect(option.hideInHelp, isTrue);
+    });
+  });
+
+  group('Example App Integration Tests', () {
+    test('Run example app with arguments (One-shot run)', () async {
+      // Because example_app.dart uses raw terminal input (stdin.lineMode = false),
+      // running it directly via Process.start without a TTY will result in a StdinException.
+      // However, we can test its one-shot argument processing by observing its output before it crashes.
+      var process = await Process.start('dart', [
+        'example/example_app.dart',
+        'test',
+        '--print="hello_integration_test"'
+      ]);
+      var stdoutBuffer = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).listen((data) {
+        stdoutBuffer.write(data);
+      });
+
+      // Wait for process to exit
+      await process.exitCode.timeout(Duration(seconds: 5), onTimeout: () {
+        process.kill();
+        return -1;
+      });
+
+      var output = stdoutBuffer.toString();
+
+      // Check outputs
+      expect(
+          output,
+          contains(
+              'hello_integration_test')); // Verify our input string was echoed
+      expect(output, contains('Test ')); // From 'test' output
+    });
+
+    test('Run interactive session via automated standard IO pipeline',
+        () async {
+      // Uses a test app equivalent to example_app.dart but drops the raw TTY `onKeyPress`
+      // so it can safely be interacted with programmatically.
+      var process = await Process.start('dart', ['test/example_test_app.dart']);
+      var stdoutBuffer = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).listen((data) {
+        stdoutBuffer.write(data);
+      });
+
+      // Wait for boot up
+      await Future.delayed(Duration(seconds: 1));
+
+      // Interactive commands pipeline
+      process.stdin.writeln('test --print=pipeline_integration');
+      await Future.delayed(Duration(milliseconds: 500));
+
+      process.stdin.writeln('help');
+      await Future.delayed(Duration(milliseconds: 500));
+
+      process.stdin.writeln('exit');
+
+      // The `exit` command should naturally close the process with exit code 0
+      var exitCode =
+          await process.exitCode.timeout(Duration(seconds: 5), onTimeout: () {
+        process.kill();
+        return -1;
+      });
+
+      expect(exitCode, 0);
+
+      var output = stdoutBuffer.toString();
+
+      // Output validations
+      expect(output, contains('TestApp>')); // Verifies processWhile app label
+      expect(output,
+          contains('pipeline_integration')); // Result of test command payload
+      expect(output,
+          contains('Test Executed')); // Result of test execution confirmation
+      expect(output, contains('✔ test')); // Result of help command
     });
   });
 }

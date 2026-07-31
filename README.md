@@ -20,6 +20,7 @@
 - **User Input Handling**: Supports reading user inputs with prompts and selection options.
 - **Structured Output**: Display tables, messages in color, and various progress indicators in the console.
 - **Help Generation**: Automatically generate a help guide for your console commands and options.
+- **Command Chaining**: Run several commands in a row in a single invocation using the `--and` flag.
 
 
 ## Getting Started
@@ -161,6 +162,36 @@ Future<CappConsole> test(c) async {
   return test(c);
 }
 ```
+
+## Command Chaining
+
+Use the `--and` flag to run several commands one after another in a single invocation. This works both when starting the app (`initArgs`) and when typing a line at the interactive prompt started by `processWhile`.
+
+```shell
+$ dart example/example_chain.dart test -p hello --and test -p world --and help --and exit
+```
+
+Each command runs in order, and a `Next command: ...` message is printed right before the next one starts:
+
+```shell
+hello
+
+Next command: test -p world
+world
+
+Next command: help
+✔ test
+	Run a test
+	-p, --print A value to print after test
+✔ exit
+	Exit the application
+✔ help
+	Show commands help
+
+Next command: exit
+```
+
+`--and` is only used to split the commands — it's never passed to any controller or option, and it never shows up in the generated help. See [`example/example_chain.dart`](example/example_chain.dart) for the full source.
 
 ## Example Output
 

@@ -246,6 +246,83 @@ void main() {
       expect(output, contains('Test ')); // From 'test' output
     });
 
+    test('Run chained commands via --and flag (One-shot run)', () async {
+      // The --and flag lets a single invocation run several commands in a row.
+      // The last command is `exit`, so the process terminates cleanly (exit code 0)
+      // before ever reaching the raw-mode stdin loop.
+      var process = await Process.start('dart', [
+        'example/example_app.dart',
+        'test',
+        '--print=chain_first',
+        '--and',
+        'test',
+        '--print=chain_second',
+        '--and',
+        'help',
+        '--and',
+        'exit',
+      ]);
+      var stdoutBuffer = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).listen((data) {
+        stdoutBuffer.write(data);
+      });
+
+      var exitCode =
+          await process.exitCode.timeout(Duration(seconds: 5), onTimeout: () {
+        process.kill();
+        return -1;
+      });
+
+      expect(exitCode, 0);
+
+      var output = stdoutBuffer.toString();
+
+      // Both chained `test` commands ran, in order.
+      expect(output, contains('chain_first'));
+      expect(output, contains('chain_second'));
+
+      // The "Next command" announcement is shown before each chained command.
+      expect(output, contains('Next command: test --print=chain_second'));
+      expect(output, contains('Next command: help'));
+      expect(output, contains('Next command: exit'));
+
+      // The chained `help` command ran too.
+      expect(output, contains('✔ test'));
+    });
+
+    test('Run chained commands interactively via --and flag', () async {
+      var process =
+          await Process.start('dart', ['test/example_test_app.dart']);
+      var stdoutBuffer = StringBuffer();
+
+      process.stdout.transform(utf8.decoder).listen((data) {
+        stdoutBuffer.write(data);
+      });
+
+      // Wait for boot up
+      await Future.delayed(Duration(seconds: 1));
+
+      // A single line with --and should run as multiple chained commands.
+      process.stdin
+          .writeln('test --print=chain_pipeline --and help --and exit');
+
+      var exitCode =
+          await process.exitCode.timeout(Duration(seconds: 5), onTimeout: () {
+        process.kill();
+        return -1;
+      });
+
+      expect(exitCode, 0);
+
+      var output = stdoutBuffer.toString();
+
+      expect(output, contains('chain_pipeline'));
+      expect(output, contains('Next command: help'));
+      expect(output, contains('Next command: exit'));
+      expect(output, contains('✔ test'));
+    });
+
     test('Run interactive session via automated standard IO pipeline',
         () async {
       // Uses a test app equivalent to example_app.dart but drops the raw TTY `onKeyPress`

@@ -11,6 +11,9 @@ class CappManager {
   // History of commands entered by the user. Each entry is a list of strings representing the command and its arguments.
   var history = <List<String>>[];
 
+  /// The flag used to chain multiple commands in a single input (e.g. `test -p --and help`).
+  static const chainFlag = '--and';
+
   /// [controllers] contin all contin all CappControllers that you can use in the app
   List<CappController> controllers;
 
@@ -106,8 +109,7 @@ class CappManager {
       promptLabel = appLabel();
     }
     if (initArgs != null && initArgs.isNotEmpty) {
-      args = initArgs;
-      await process();
+      await _processChain(initArgs);
     }
 
     if (onKeyPress != null) {
@@ -125,10 +127,36 @@ class CappManager {
       line = line.trim();
       line = line.replaceAll(RegExp('  '), ' ');
       if (line.isNotEmpty) {
-        args = line.split(' ');
-        await process();
+        await _processChain(line.split(' '));
       }
       stdout.write(appLabel());
+    }
+  }
+
+  /// Splits [fullArgs] on [chainFlag] (`--and`) and runs each resulting
+  /// command in sequence, announcing the next command before it runs.
+  Future<void> _processChain(List<String> fullArgs) async {
+    var commands = <List<String>>[[]];
+    for (var arg in fullArgs) {
+      if (arg == chainFlag) {
+        commands.add([]);
+      } else {
+        commands.last.add(arg);
+      }
+    }
+    commands = commands.where((command) => command.isNotEmpty).toList();
+    if (commands.isEmpty) return;
+
+    for (var i = 0; i < commands.length; i++) {
+      args = commands[i];
+      await process();
+
+      if (i < commands.length - 1) {
+        CappConsole.write(
+          "Next command: ${commands[i + 1].join(' ')}",
+          CappColors.info,
+        );
+      }
     }
   }
 
@@ -159,8 +187,7 @@ class CappManager {
             // Restore line mode for command processing output
             stdin.lineMode = true;
             stdin.echoMode = true;
-            args = line.split(' ');
-            await process();
+            await _processChain(line.split(' '));
             stdin.lineMode = false;
             stdin.echoMode = false;
           }

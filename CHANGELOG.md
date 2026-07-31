@@ -1,3 +1,9 @@
+## 2.0.0
+- [#3](https://github.com/uproid/capp/issues/3) Added command chaining: pass `--and` between commands (e.g. `test -p hello --and help --and exit`) to run several commands, one after another, in a single invocation. Works for the initial CLI arguments as well as for lines typed at the interactive prompt (both line mode and raw mode). Before each next command runs, a `Next command: ...` message is printed. `--and` is only used as a separator, it's never forwarded to controllers/options and never appears in the generated help.
+- Added `example/example_chain.dart` demonstrating the new command chaining feature.
+- Added a GitHub Actions workflow to run the test suite on every push/PR.
+- Greatly expanded the test suite: unit tests for `CappManager`, `CappConsole`, and `CappOption`, plus integration tests that spawn the example apps to verify one-shot argument processing, interactive stdin sessions, and command chaining end-to-end.
+
 ## 1.1.8
 - Added command history tracking to `CappManager`, allowing navigation through previously entered commands using arrow keys
 - Added `onKeyPress` callback to `CappManager` for handling raw mode key events, enabling custom key bindings

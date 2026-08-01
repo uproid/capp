@@ -1,3 +1,9 @@
+## 2.1.0
+- `writeHelpModern` now groups namespaced sub-commands: a controller named `namespace:subcommand` (e.g. `test:subtest`, called exactly as `test:subtest -i=5`) is displayed nested under its `namespace` header instead of being listed as an unrelated top-level command. The command name and its description are now printed on the same line (name in bold green, description in yellow) instead of on two separate lines.
+- Added `example/example_app.dart` entries (`test:subtest`, `test:report`) demonstrating namespaced sub-commands.
+- Added `CappConsole.writeAlert` to print a message as a boxed, colored alert (info/success/warning/error) with a severity icon, wrapping long messages to fit the terminal width.
+- Added `example/example.dart` "Alert" option and tests demonstrating `writeAlert`.
+
 ## 2.0.0
 - [#3](https://github.com/uproid/capp/issues/3) Added command chaining: pass `--and` between commands (e.g. `test -p hello --and help --and exit`) to run several commands, one after another, in a single invocation. Works for the initial CLI arguments as well as for lines typed at the interactive prompt (both line mode and raw mode). Before each next command runs, a `Next command: ...` message is printed. `--and` is only used as a separator, it's never forwarded to controllers/options and never appears in the generated help.
 - Added `example/example_chain.dart` demonstrating the new command chaining feature.

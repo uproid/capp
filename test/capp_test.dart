@@ -179,6 +179,18 @@ void main() {
       expect(console.output, contains('msg'));
     });
 
+    test('writeAlert methods should return current instance', () {
+      var console = CappConsole.writeAlert('msg', CappColors.error);
+      expect(console, isA<CappConsole>());
+      expect(console.output, 'msg');
+      expect(console.color, CappColors.error);
+    });
+
+    test('writeAlert with CappColors.off should not throw', () {
+      var console = CappConsole.writeAlert('msg', CappColors.off);
+      expect(console, isA<CappConsole>());
+    });
+
     test('Table creation check logic (integration check without crashing)', () {
       var console = CappConsole.writeTable([
         ['ID', 'Name'],

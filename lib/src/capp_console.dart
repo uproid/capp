@@ -85,6 +85,124 @@ class CappConsole {
         .log();
   }
 
+  /// [writeAlert] method is used to print a message as a boxed alert with a
+  /// colored background and a severity icon, similar to alert components in
+  /// UI frameworks (e.g. `writeAlert('Oops!', CappColors.error)` for a
+  /// "danger" style alert).
+  static CappConsole writeAlert(
+    dynamic message, [
+    CappColors color = CappColors.info,
+    bool space = false,
+  ]) {
+    if (color == CappColors.off) return CappConsole(message, color);
+
+    var bg = _alertBackground(color);
+    var fg = _alertForeground(color);
+    const bold = '\x1B[1m';
+    const reset = '\x1B[0m';
+    var style = bg.isEmpty ? '' : '$bg$fg$bold';
+
+    // Wrap long messages so the box never grows wider than the terminal.
+    var prefix = '${_alertIcon(color)}  ';
+    var maxContentWidth = _terminalWidth() - prefix.length - 4;
+    var wrapped = _wrapText('$message', maxContentWidth < 20 ? 20 : maxContentWidth);
+    var indent = ' ' * prefix.length;
+    var lines = [
+      '$prefix${wrapped.first}',
+      for (var i = 1; i < wrapped.length; i++) '$indent${wrapped[i]}',
+    ];
+
+    var width = lines.fold<int>(0, (w, l) => l.length > w ? l.length : w);
+    var top = '╭${'─' * (width + 2)}╮';
+    var bottom = '╰${'─' * (width + 2)}╯';
+
+    if (space) stdout.writeln();
+    stdout.writeln('$style$top$reset');
+    for (var line in lines) {
+      stdout.writeln('$style│ ${line.padRight(width)} │$reset');
+    }
+    stdout.writeln('$style$bottom$reset');
+    if (space) stdout.writeln();
+
+    return CappConsole(message, color);
+  }
+
+  /// Greedily wraps [text] into lines no longer than [maxWidth] (breaking on
+  /// whitespace). A single word longer than [maxWidth] is kept on its own
+  /// line rather than being hard-broken.
+  static List<String> _wrapText(String text, int maxWidth) {
+    var words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    var lines = <String>[];
+    var current = StringBuffer();
+    for (var word in words) {
+      if (current.isEmpty) {
+        current.write(word);
+      } else if (current.length + 1 + word.length <= maxWidth) {
+        current.write(' ');
+        current.write(word);
+      } else {
+        lines.add(current.toString());
+        current = StringBuffer()..write(word);
+      }
+    }
+    if (current.isNotEmpty) lines.add(current.toString());
+    return lines.isEmpty ? [''] : lines;
+  }
+
+  static int _terminalWidth() {
+    try {
+      return stdout.hasTerminal ? stdout.terminalColumns : 80;
+    } catch (_) {
+      return 80;
+    }
+  }
+
+  static String _alertIcon(CappColors color) {
+    switch (color) {
+      case CappColors.warning:
+        return '⚠';
+      case CappColors.error:
+        return '✖';
+      case CappColors.success:
+        return '✔';
+      case CappColors.info:
+        return 'ℹ';
+      case CappColors.none:
+      case CappColors.off:
+        return '•';
+    }
+  }
+
+  static String _alertBackground(CappColors color) {
+    switch (color) {
+      case CappColors.warning:
+        return '\x1B[43m';
+      case CappColors.error:
+        return '\x1B[41m';
+      case CappColors.success:
+        return '\x1B[42m';
+      case CappColors.info:
+        return '\x1B[46m';
+      case CappColors.none:
+      case CappColors.off:
+        return '';
+    }
+  }
+
+  static String _alertForeground(CappColors color) {
+    switch (color) {
+      case CappColors.warning:
+      case CappColors.success:
+      case CappColors.info:
+        return '\x1B[30m';
+      case CappColors.error:
+        return '\x1B[97m';
+      case CappColors.none:
+      case CappColors.off:
+        return '';
+    }
+  }
+
   /// [clear] method is used to clear the console screen.
   static void clear() {
     // if (Platform.isWindows) {

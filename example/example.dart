@@ -48,6 +48,7 @@ Future<CappConsole> test(CappController c) async {
     'Multi Choice',
     'Json Viewer',
     'Menu',
+    'Alert',
     'Clear screen',
     'Help',
     'Exit',
@@ -181,6 +182,19 @@ Future<CappConsole> test(CappController c) async {
     };
 
     await CappConsole.menuChoice("Test Menu", menu, color: CappColors.warning);
+  }
+
+  // Alert
+  else if (select == 'Alert') {
+    CappConsole.writeAlert('This is an info alert', CappColors.info);
+    CappConsole.writeAlert('This is a success alert', CappColors.success);
+    CappConsole.writeAlert(
+      'This is a warning alert with a much longer message that should '
+      'wrap onto multiple lines instead of stretching the box past the '
+      'width of the terminal window.',
+      CappColors.warning,
+    );
+    CappConsole.writeAlert('This is a danger alert', CappColors.error);
   }
 
   // Help

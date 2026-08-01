@@ -77,6 +77,43 @@ void main(List<String> args) async {
           return CappConsole.empty;
         },
       ),
+      // Namespaced sub-commands: any controller whose name contains a colon
+      // (`namespace:subcommand`) is called exactly like a normal command,
+      // e.g. `test:subtest -i=5`, but writeHelpModern() groups it under its
+      // namespace ("test") instead of listing it as an unrelated command.
+      CappController(
+        'test:subtest',
+        description: 'Run a single sub-test by its index',
+        options: [
+          CappOption(
+            name: 'iter',
+            shortName: 'i',
+            description: 'Index of the sub-test to run',
+            value: '1',
+          ),
+          helpOption,
+        ],
+        run: (c) async {
+          var iter = c.getOption('iter', def: '1');
+          CappConsole.write(
+            "Running sub-test #$iter",
+            CappColors.success,
+          );
+          return CappConsole.empty;
+        },
+      ),
+      CappController(
+        'test:report',
+        description: 'Show a report of the last test run',
+        options: [helpOption],
+        run: (c) async {
+          CappConsole.write(
+            "Test report generated at ${DateTime.now()}",
+            CappColors.success,
+          );
+          return CappConsole.empty;
+        },
+      ),
       CappController(
         'exit',
         description: 'Exit the application',

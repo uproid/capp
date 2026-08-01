@@ -321,6 +321,12 @@ class CappManager {
   /// help. If it is null it will show all controllers.
   /// you can call this method from the controller to write the help of the application in a modern way.
   /// This method uses ANSI escape codes to color the output and make it more readable.
+  ///
+  /// Controllers whose name contains a colon (e.g. `test:subtest`) are treated
+  /// as sub-commands of the part before the colon (`test`). They are grouped
+  /// under a single namespace header instead of being listed as independent,
+  /// unrelated commands, which keeps the help output readable as the number
+  /// of sub-commands grows.
   CappConsole writeHelpModern([List<CappController>? myControllers]) {
     var selectedControllers = myControllers ?? [...controllers, main];
 
@@ -336,24 +342,86 @@ class CappManager {
       }
     }
 
+    var groupOrder = <String>[];
+    var groups = <String, List<CappController>>{};
     for (var controller in selectedControllers) {
-      if (controller.name.isNotEmpty) {
-        cprint("\x1B[1m✔ ${controller.name}\x1B[22m", CappColors.success);
-        if (controller.description.isNotEmpty) {
-          cprint("\t${controller.description}", CappColors.warning);
-        }
-      } else {
-        cprint(controller.description, CappColors.info);
+      var key = controller.name.contains(':')
+          ? controller.name.split(':').first
+          : controller.name;
+      groups.putIfAbsent(key, () => []);
+      groups[key]!.add(controller);
+      if (!groupOrder.contains(key)) {
+        groupOrder.add(key);
       }
-      for (var option in controller.options) {
-        if (option.hideInHelp) {
+    }
+
+    for (var key in groupOrder) {
+      var members = groups[key]!;
+      var isNamespace = key.isNotEmpty && members.any((c) => c.name != key);
+
+      if (!isNamespace) {
+        for (var controller in members) {
+          _writeControllerHelp(controller, maxNameLen);
+        }
+        continue;
+      }
+
+      CappController? parent;
+      for (var member in members) {
+        if (member.name == key) {
+          parent = member;
+        }
+      }
+
+      _printCommandLine('✔ $key', parent?.description ?? '');
+      if (parent != null) {
+        _writeOptions(parent, maxNameLen);
+      }
+
+      for (var member in members) {
+        if (member == parent) {
           continue;
         }
-        var nameCol = '--${option.name}'.padRight(maxNameLen + 2);
-        cprint("\t-${option.shortName}, $nameCol ${option.description}");
+        _printCommandLine('✔ ${member.name}', member.description,
+            indent: '\n\t');
+        _writeOptions(member, maxNameLen, indent: '\t');
       }
     }
 
     return CappConsole('');
+  }
+
+  void _writeControllerHelp(CappController controller, int maxNameLen) {
+    if (controller.name.isNotEmpty) {
+      _printCommandLine('✔ ${controller.name}', controller.description);
+    } else {
+      cprint(controller.description, CappColors.info);
+    }
+    _writeOptions(controller, maxNameLen);
+  }
+
+  /// Prints a command name (bold green) with its description (yellow) on the
+  /// same line, separated by a tab, instead of on the line below it.
+  void _printCommandLine(String label, String description,
+      {String indent = ''}) {
+    var line = '$indent\x1B[32m\x1B[1m$label\x1B[22m\x1B[0m';
+    if (description.isNotEmpty) {
+      line += '\t\x1B[33m$description\x1B[0m';
+    }
+    print(line);
+  }
+
+  void _writeOptions(
+    CappController controller,
+    int maxNameLen, {
+    String indent = '',
+  }) {
+    for (var option in controller.options) {
+      if (option.hideInHelp) {
+        continue;
+      }
+      var nameCol = '--${option.name}'.padRight(maxNameLen + 2);
+      cprint("$indent\t-${option.shortName}, $nameCol ${option.description}");
+    }
   }
 }

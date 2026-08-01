@@ -123,6 +123,67 @@ void main() {
       expect(helpText.contains('--verbose'), isTrue);
     });
 
+    test('writeHelpModern groups namespaced sub-commands', () {
+      var capp = CappManager(
+        main: CappController('',
+            options: [], run: (c) async => CappConsole.empty),
+        args: [],
+        controllers: [
+          CappController('test',
+              description: 'Run a test',
+              options: [],
+              run: (c) async => CappConsole.empty),
+          CappController('test:subtest',
+              description: 'Run a sub-test',
+              options: [],
+              run: (c) async => CappConsole.empty),
+          CappController('test:report',
+              description: 'Show a report',
+              options: [],
+              run: (c) async => CappConsole.empty),
+          CappController('exit',
+              description: 'Exit the app',
+              options: [],
+              run: (c) async => CappConsole.empty),
+        ],
+      );
+
+      var lines = <String>[];
+      runZoned(() {
+        capp.writeHelpModern();
+      },
+          zoneSpecification: ZoneSpecification(
+            print: (self, parent, zone, line) => lines.add(line),
+          ));
+
+      var testIndex =
+          lines.indexWhere((l) => l.contains('✔ test') && !l.contains(':'));
+      var subtestIndex = lines.indexWhere((l) => l.contains('✔ test:subtest'));
+      var reportIndex = lines.indexWhere((l) => l.contains('✔ test:report'));
+      var exitIndex = lines.indexWhere((l) => l.contains('✔ exit'));
+
+      // The namespace header and both sub-commands must be present and
+      // ordered directly beneath it, instead of being listed as unrelated
+      // top-level commands.
+      expect(testIndex, greaterThanOrEqualTo(0));
+      expect(subtestIndex, greaterThan(testIndex));
+      expect(reportIndex, greaterThan(subtestIndex));
+      expect(exitIndex, greaterThan(reportIndex));
+
+      // Sub-commands are nested under their namespace header: indented,
+      // unlike the flush-left namespace/top-level command lines.
+      expect(lines[testIndex].startsWith('\n\t'), isFalse);
+      expect(lines[exitIndex].startsWith('\n\t'), isFalse);
+      expect(lines[subtestIndex].startsWith('\n\t'), isTrue);
+      expect(lines[reportIndex].startsWith('\n\t'), isTrue);
+
+      // The description must sit on the same line as the command name
+      // instead of on a separate line below it.
+      expect(lines[testIndex].contains('Run a test'), isTrue);
+      expect(lines[subtestIndex].contains('Run a sub-test'), isTrue);
+      expect(lines[reportIndex].contains('Show a report'), isTrue);
+    });
+
     test('History management', () async {
       var capp = CappManager(
         main: CappController('main',
@@ -304,8 +365,7 @@ void main() {
     });
 
     test('Run chained commands interactively via --and flag', () async {
-      var process =
-          await Process.start('dart', ['test/example_test_app.dart']);
+      var process = await Process.start('dart', ['test/example_test_app.dart']);
       var stdoutBuffer = StringBuffer();
 
       process.stdout.transform(utf8.decoder).listen((data) {

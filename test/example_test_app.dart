@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:capp/capp.dart';
+import 'package:capp/src/cappout.dart';
 
 void main(List<String> args) async {
   var helpOption = CappOption(
@@ -37,7 +38,7 @@ void main(List<String> args) async {
         ],
         run: (c) async {
           if (c.existsOption('print')) {
-            print(c.getOption('print', def: 'no value'));
+            Cout.write(c.getOption('print', def: 'no value'));
           }
           CappConsole.write("Test Executed", CappColors.success);
           return CappConsole.empty;

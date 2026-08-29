@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:capp/src/cappout.dart';
+
 enum ControlCharacter {
   none,
   arrowUp,
@@ -54,19 +56,19 @@ class CappConsole {
     var space = this.space ? '\n\n' : '';
     switch (color) {
       case CappColors.warning:
-        stdout.writeln('\x1B[33m$space$output$space\x1B[0m');
+        Cout.writeln('\x1B[33m$space$output$space\x1B[0m');
         break;
       case CappColors.error:
-        stdout.writeln('\x1B[31m$space$output$space\x1B[0m');
+        Cout.writeln('\x1B[31m$space$output$space\x1B[0m');
         break;
       case CappColors.success:
-        stdout.writeln('\x1B[32m$space$output$space\x1B[0m');
+        Cout.writeln('\x1B[32m$space$output$space\x1B[0m');
         break;
       case CappColors.info:
-        stdout.writeln('\x1B[36m$space$output$space\x1B[0m');
+        Cout.writeln('\x1B[36m$space$output$space\x1B[0m');
         break;
       case CappColors.none:
-        stdout.writeln(output);
+        Cout.writeln(output);
       case CappColors.off:
         break;
     }
@@ -105,7 +107,8 @@ class CappConsole {
     // Wrap long messages so the box never grows wider than the terminal.
     var prefix = '${_alertIcon(color)}  ';
     var maxContentWidth = _terminalWidth() - prefix.length - 4;
-    var wrapped = _wrapText('$message', maxContentWidth < 20 ? 20 : maxContentWidth);
+    var wrapped =
+        _wrapText('$message', maxContentWidth < 20 ? 20 : maxContentWidth);
     var indent = ' ' * prefix.length;
     var lines = [
       '$prefix${wrapped.first}',
@@ -116,13 +119,13 @@ class CappConsole {
     var top = '╭${'─' * (width + 2)}╮';
     var bottom = '╰${'─' * (width + 2)}╯';
 
-    if (space) stdout.writeln();
-    stdout.writeln('$style$top$reset');
+    if (space) Cout.writeln();
+    Cout.writeln('$style$top$reset');
     for (var line in lines) {
-      stdout.writeln('$style│ ${line.padRight(width)} │$reset');
+      Cout.writeln('$style│ ${line.padRight(width)} │$reset');
     }
-    stdout.writeln('$style$bottom$reset');
-    if (space) stdout.writeln();
+    Cout.writeln('$style$bottom$reset');
+    if (space) Cout.writeln();
 
     return CappConsole(message, color);
   }
@@ -208,9 +211,9 @@ class CappConsole {
     // if (Platform.isWindows) {
     //   Process.runSync('cls', [], runInShell: true);
     // } else {
-    //   stdout.write('\x1B[2J\x1B[0;0H');
+    //   write('\x1B[2J\x1B[0;0H');
     // }
-    stdout.write('\x1B[2J\x1B[0;0H');
+    Cout.write('\x1B[2J\x1B[0;0H');
   }
 
   /// [read] method is used to read the input from the console.
@@ -221,7 +224,7 @@ class CappConsole {
     bool isSlug = false,
     bool canBreak = true,
   }) {
-    stdout.write('\n\n$message ');
+    Cout.write('\n\n$message ');
     var res = '';
     try {
       var line = stdin.readLineSync();
@@ -308,6 +311,9 @@ class CappConsole {
         } else if (type == CappProgressType.circle) {
           var rotating = '⣿⣷⣯⣟⡿⢿⣻⣽⣾';
           return "\t\t" + rotating[(index ~/ 1.5) % rotating.length] + ' ';
+        } else if (type == CappProgressType.puzzle) {
+          var rotating = '⣿⣷⣶⣦⣤⣄⣀⡈⠉⠙⠛⠻⠿⢿';
+          return "\t\t" + rotating[(index ~/ 1.5) % rotating.length] + ' ';
         } else if (type == CappProgressType.timer) {
           var time = DateTime.timestamp().difference(startTime);
           return '\t\t${time.inSeconds}.${time.inMilliseconds ~/ 100 % 10}s ';
@@ -333,8 +339,9 @@ class CappConsole {
       }
 
       while (isLoading) {
-        stdout.write('\r$message ${spinner(spinnerIndex)}');
-        if (type != CappProgressType.circle) {
+        Cout.write('\r$message ${spinner(spinnerIndex)}');
+        if (![CappProgressType.circle, CappProgressType.puzzle]
+            .contains(type)) {
           spinnerIndex = (spinnerIndex + 1) % 30;
         } else {
           spinnerIndex++;
@@ -355,7 +362,7 @@ class CappConsole {
       // }
       isLoading = false;
       await spinnerFuture;
-      stdout.write('\r$message\t\tDone!                            \n');
+      Cout.write('\r$message\t\tDone!                            \n');
     }
   }
 
@@ -369,9 +376,9 @@ class CappConsole {
     List<String> options, {
     bool isRequired = false,
   }) {
-    stdout.writeln('\n\n$message\n');
+    Cout.writeln('\n\n$message\n');
     for (var i = 0; i < options.length; i++) {
-      stdout.writeln("  [${i + 1}]. ${options[i]}");
+      Cout.writeln("  [${i + 1}]. ${options[i]}");
     }
 
     var res = read("Enter the number of the option:");
@@ -683,7 +690,7 @@ class CappConsole {
     if (_activeBuffer == null) return;
     var len = _activeBuffer!.length;
     // Move cursor back, overwrite with spaces, move back again
-    stdout.write('\r${_activePromptLabel}${' ' * len}\r${_activePromptLabel}');
+    Cout.write('\r${_activePromptLabel}${' ' * len}\r${_activePromptLabel}');
     _activeBuffer!.clear();
   }
 
@@ -691,7 +698,7 @@ class CappConsole {
   static void addToCommandBar(String text) {
     if (_activeBuffer == null) return;
     _activeBuffer!.write(text);
-    stdout.write(text);
+    Cout.write(text);
   }
 }
 
@@ -713,4 +720,5 @@ enum CappProgressType {
   bar,
   circle,
   timer,
+  puzzle,
 }

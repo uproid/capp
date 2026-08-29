@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:capp/capp.dart';
+import 'package:capp/src/cappout.dart';
 
 void main(List<String> args) async {
   int historyIndex = 0;
@@ -63,7 +64,7 @@ void main(List<String> args) async {
         ],
         run: (c) async {
           if (c.existsOption('print')) {
-            print(c.getOption('print', def: 'no value'));
+            Cout.writeln(c.getOption('print', def: 'no value'));
           }
           CappConsole.write(
             "Test ${DateTime.now()}",

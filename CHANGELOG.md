@@ -1,3 +1,8 @@
+## 2.2.0
+- Added `CappProgressType.puzzle` and a matching puzzle-style spinner to `CappConsole.progress`, with `example/example.dart` updated to demonstrate the new animation.
+- Added output interception support through `CappManager.addOnWrite` and `removeOnWrite`, backed by the new `Cout` helper, so console output can be observed or captured without changing the normal terminal flow.
+- Updated the console output pipeline to route writes through `Cout`, keeping interactive prompts, alerts, progress bars, and command output consistent while enabling output listeners.
+
 ## 2.1.0
 - `writeHelpModern` now groups namespaced sub-commands: a controller named `namespace:subcommand` (e.g. `test:subtest`, called exactly as `test:subtest -i=5`) is displayed nested under its `namespace` header instead of being listed as an unrelated top-level command. The command name and its description are now printed on the same line (name in bold green, description in yellow) instead of on two separate lines.
 - Added `example/example_app.dart` entries (`test:subtest`, `test:report`) demonstrating namespaced sub-commands.

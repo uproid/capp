@@ -1,15 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'capp_controller.dart';
 import 'capp_console.dart';
 import 'capp_option.dart';
+import 'cappout.dart';
 
 /// [CappManager] is a class that represents the manager of the console application.
 /// The manager is a class that contains the main logic of the application.
 class CappManager {
   // History of commands entered by the user. Each entry is a list of strings representing the command and its arguments.
   var history = <List<String>>[];
+
+  void addOnWrite(CoutEvent on) {
+    Cout.addOnWrite(on);
+  }
+
+  void removeOnWrite(CoutEvent on) {
+    Cout.removeOnWrite(on);
+  }
 
   /// The flag used to chain multiple commands in a single input (e.g. `test -p --and help`).
   static const chainFlag = '--and';
@@ -38,7 +46,8 @@ class CappManager {
 
   /// The [process] method is used to process the arguments and call the controllers.
   /// Call this function to start the application.
-  Future<void> process() async {
+  Future<void> process({List<String>? newArgs}) async {
+    args = newArgs ?? args;
     if (args.isEmpty) {
       main.init(manager: this);
       var res = await main.run(main);
@@ -121,7 +130,7 @@ class CappManager {
 
   Future _processWhileLine(String Function() appLabel) async {
     final input = stdin.transform(utf8.decoder);
-    stdout.write(appLabel());
+    Cout.write(appLabel());
 
     await for (String line in input.transform(LineSplitter())) {
       line = line.trim();
@@ -129,7 +138,7 @@ class CappManager {
       if (line.isNotEmpty) {
         await _processChain(line.split(' '));
       }
-      stdout.write(appLabel());
+      Cout.write(appLabel());
     }
   }
 
@@ -167,7 +176,7 @@ class CappManager {
     try {
       var buffer = StringBuffer();
       CappConsole.setActiveBuffer(buffer, appLabel());
-      stdout.write(appLabel());
+      Cout.write(appLabel());
 
       while (true) {
         int byte = stdin.readByteSync();
@@ -177,10 +186,10 @@ class CappManager {
         onKeyPress!(key, this);
 
         if (key.controlChar == ControlCharacter.ctrlC) {
-          stdout.writeln();
+          Cout.writeln();
           break;
         } else if (key.controlChar == ControlCharacter.enter) {
-          stdout.writeln();
+          Cout.writeln();
           var line = buffer.toString().trim().replaceAll(RegExp('  '), ' ');
           buffer.clear();
           if (line.isNotEmpty) {
@@ -191,19 +200,19 @@ class CappManager {
             stdin.lineMode = false;
             stdin.echoMode = false;
           }
-          stdout.write(appLabel());
+          Cout.write(appLabel());
         } else if (byte == 127 || byte == 8) {
           // Backspace
           if (buffer.isNotEmpty) {
             var str = buffer.toString();
             buffer.clear();
             buffer.write(str.substring(0, str.length - 1));
-            stdout.write('\b \b');
+            Cout.write('\b \b');
           }
         } else if (key.controlChar == ControlCharacter.none && byte >= 32) {
           // Printable character
           buffer.write(key.char);
-          stdout.write(key.char);
+          Cout.write(key.char);
         }
       }
     } finally {
@@ -236,7 +245,7 @@ class CappManager {
   /// The [myControllers] is a list of controllers that you want to show in the help. If it is null it will show all controllers.
   /// you can call this method from the controller to get the help of the application.
   String getHelp([List<CappController>? myControllers]) {
-    var selectedControllers = myControllers ?? [...this.controllers, main];
+    var selectedControllers = myControllers ?? [...controllers, main];
     var help = "Available commands:\n";
     var index = 1;
     for (var controller in selectedControllers) {
@@ -301,18 +310,18 @@ class CappManager {
     return (value: option.value, exist: exist);
   }
 
-  static void cprint(String text, [CappColors color = CappColors.none]) {
+  static void cwrite(String text, [CappColors color = CappColors.none]) {
     switch (color) {
       case CappColors.warning:
-        print('\x1B[33m$text\x1B[0m');
+        Cout.writeln('\x1B[33m$text\x1B[0m');
       case CappColors.error:
-        print('\x1B[31m$text\x1B[0m');
+        Cout.writeln('\x1B[31m$text\x1B[0m');
       case CappColors.success:
-        print('\x1B[32m$text\x1B[0m');
+        Cout.writeln('\x1B[32m$text\x1B[0m');
       case CappColors.info:
-        print('\x1B[36m$text\x1B[0m');
+        Cout.writeln('\x1B[36m$text\x1B[0m');
       default:
-        print(text);
+        Cout.writeln(text);
     }
   }
 
@@ -395,7 +404,7 @@ class CappManager {
     if (controller.name.isNotEmpty) {
       _printCommandLine('✔ ${controller.name}', controller.description);
     } else {
-      cprint(controller.description, CappColors.info);
+      cwrite(controller.description, CappColors.info);
     }
     _writeOptions(controller, maxNameLen);
   }
@@ -408,7 +417,7 @@ class CappManager {
     if (description.isNotEmpty) {
       line += '\t\x1B[33m$description\x1B[0m';
     }
-    print(line);
+    Cout.writeln(line);
   }
 
   void _writeOptions(
@@ -421,7 +430,7 @@ class CappManager {
         continue;
       }
       var nameCol = '--${option.name}'.padRight(maxNameLen + 2);
-      cprint("$indent\t-${option.shortName}, $nameCol ${option.description}");
+      cwrite("$indent\t-${option.shortName}, $nameCol ${option.description}");
     }
   }
 }

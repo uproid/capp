@@ -19,8 +19,10 @@
 - **Argument and Option Management**: Define and manage command-line arguments and options easily.
 - **User Input Handling**: Supports reading user inputs with prompts and selection options.
 - **Structured Output**: Display tables, messages in color, and various progress indicators in the console.
+- **Console Output Hooks**: Observe or capture console writes with `CappManager.addOnWrite`/`removeOnWrite` and the `Cout` helper.
 - **Help Generation**: Automatically generate a help guide for your console commands and options.
 - **Command Chaining**: Run several commands in a row in a single invocation using the `--and` flag.
+- **Progress Animations**: Built-in progress styles include the new puzzle spinner for more visual feedback during long-running tasks.
 
 
 ## Getting Started
@@ -161,6 +163,41 @@ Future<CappConsole> test(c) async {
 
   return test(c);
 }
+```
+
+## Console Output Hooks
+
+You can observe console writes without changing the normal terminal flow by attaching a listener to the manager:
+
+```dart
+final app = CappManager(
+  main: CappController(
+    '',
+    options: [],
+    run: (c) async => CappConsole('Ready'),
+  ),
+  args: const [],
+  controllers: const [],
+);
+
+app.addOnWrite((line) {
+  // Capture or forward console output elsewhere
+  print('OUT: $line');
+});
+```
+
+This is useful for logging, mirroring output, or testing interactive console behavior. The `Cout` helper is used internally to keep output listeners and the regular terminal output synchronized.
+
+## Progress Puzzle
+
+`CappConsole.progress` supports a puzzle-style animation for longer tasks:
+
+```dart
+await CappConsole.progress(
+  'Processing data...',
+  () async => Future.delayed(Duration(seconds: 5)),
+  type: CappProgressType.puzzle,
+);
 ```
 
 ## Command Chaining

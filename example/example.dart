@@ -39,6 +39,7 @@ void main([
 Future<CappConsole> test(CappController c) async {
   const options = [
     'Progress circle',
+    'Progress puzzle',
     'Progress bar',
     'Progress spinner',
     'Progress timer',
@@ -58,6 +59,15 @@ Future<CappConsole> test(CappController c) async {
     options,
   );
   CappConsole.write('Your selection is: $select', CappColors.success);
+
+  // Progress circle
+  if (select == 'Progress puzzle') {
+    await CappConsole.progress(
+      'I am waiting here for 5 secounds!',
+      () async => Future.delayed(Duration(seconds: 5)),
+      type: CappProgressType.puzzle,
+    );
+  }
 
   // Progress circle
   if (select == 'Progress circle') {

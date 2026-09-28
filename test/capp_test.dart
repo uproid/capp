@@ -149,12 +149,13 @@ void main() {
       );
 
       var lines = <String>[];
-      runZoned(() {
+      void onWrite(String line) => lines.add(line);
+      capp.addOnWrite(onWrite);
+      try {
         capp.writeHelpModern();
-      },
-          zoneSpecification: ZoneSpecification(
-            print: (self, parent, zone, line) => lines.add(line),
-          ));
+      } finally {
+        capp.removeOnWrite(onWrite);
+      }
 
       var testIndex =
           lines.indexWhere((l) => l.contains('✔ test') && !l.contains(':'));
@@ -265,6 +266,75 @@ void main() {
       var console =
           CappConsole.writeJson(data, pretty: true, color: CappColors.info);
       expect(console.output, contains('"key": "value"'));
+    });
+
+    test('CappProgressReporter starts at 0 percent with the initial message',
+        () {
+      var reporter = CappProgressReporter('Starting...');
+      expect(reporter.percent, 0);
+      expect(reporter.message, 'Starting...');
+    });
+
+    test('CappProgressReporter update sets percent and message', () {
+      var reporter = CappProgressReporter('Starting...');
+      reporter.update(percent: 42, message: 'Halfway there');
+      expect(reporter.percent, 42);
+      expect(reporter.message, 'Halfway there');
+    });
+
+    test('CappProgressReporter update clamps percent between 0 and 100', () {
+      var reporter = CappProgressReporter('Starting...');
+      reporter.update(percent: 150);
+      expect(reporter.percent, 100);
+
+      reporter.update(percent: -10);
+      expect(reporter.percent, 0);
+    });
+
+    test('CappProgressReporter update only changes given fields', () {
+      var reporter = CappProgressReporter('Starting...');
+      reporter.update(percent: 30);
+      expect(reporter.percent, 30);
+      expect(reporter.message, 'Starting...');
+
+      reporter.update(message: 'Almost done');
+      expect(reporter.percent, 30);
+      expect(reporter.message, 'Almost done');
+    });
+
+    test('progressPercent resolves with the action result', () async {
+      var result = await CappConsole.progressPercent<String>(
+        'Downloading...',
+        (reporter) async {
+          reporter.update(percent: 50, message: 'Halfway');
+          return 'done';
+        },
+      );
+      expect(result, 'done');
+    });
+
+    test('progressPercent lets the action report progress', () async {
+      var seenPercents = <double>[];
+      await CappConsole.progressPercent(
+        'Downloading...',
+        (reporter) async {
+          for (var p in [25.0, 50.0, 75.0, 100.0]) {
+            reporter.update(percent: p);
+            seenPercents.add(reporter.percent);
+          }
+        },
+      );
+      expect(seenPercents, [25.0, 50.0, 75.0, 100.0]);
+    });
+
+    test('progressPercent propagates errors thrown by the action', () async {
+      expect(
+        () => CappConsole.progressPercent(
+          'Downloading...',
+          (reporter) async => throw Exception('boom'),
+        ),
+        throwsException,
+      );
     });
   });
 

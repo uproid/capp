@@ -1,6 +1,6 @@
 name: capp
 description: This tool is perfect for creating console apps, offering widgets for Console elements, input handling, Help generation, argument events, and option configuration
-version: 2.2.0
+version: 2.3.0
 homepage: https://webapp.uproid.com/
 repository: https://github.com/uproid/capp.git
 issue_tracker: https://github.com/uproid/capp/issues
@@ -28,3 +28,5 @@ environment:
 dev_dependencies:
   test: ^1.31.2
 
+finch:
+  serve: example/example.dart

@@ -50,6 +50,36 @@ void main(List<String> args) async {
         },
       ),
       CappController(
+        'build',
+        description: 'Simulate a multi-stage build with a percentage bar',
+        options: [helpOption],
+        run: (c) async {
+          const stages = [
+            'Cleaning output directory',
+            'Resolving dependencies',
+            'Compiling sources',
+            'Running tests',
+            'Bundling assets',
+            'Packaging artifact',
+          ];
+
+          await CappConsole.progressPercent(
+            'Starting build...',
+            (reporter) async {
+              for (var i = 0; i < stages.length; i++) {
+                reporter.update(
+                  percent: i / stages.length * 100,
+                  message: stages[i],
+                );
+                await Future.delayed(Duration(milliseconds: 250));
+              }
+              reporter.update(percent: 100, message: 'Build complete');
+            },
+          );
+          return CappConsole.empty;
+        },
+      ),
+      CappController(
         'exit',
         description: 'Exit the application',
         options: [helpOption],

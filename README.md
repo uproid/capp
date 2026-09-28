@@ -23,6 +23,7 @@
 - **Help Generation**: Automatically generate a help guide for your console commands and options.
 - **Command Chaining**: Run several commands in a row in a single invocation using the `--and` flag.
 - **Progress Animations**: Built-in progress styles include the new puzzle spinner for more visual feedback during long-running tasks.
+- **Progress Percent**: `CappConsole.progressPercent` shows a live-updating percentage bar (with a configurable color) for actions that can report their own progress, such as downloads or uploads.
 
 
 ## Getting Started
@@ -199,6 +200,46 @@ await CappConsole.progress(
   type: CappProgressType.puzzle,
 );
 ```
+
+## Progress Percent
+
+`CappConsole.progressPercent` shows a two-line progress widget for actions that
+can report their own completion percentage, such as downloading or uploading a
+file. The action receives a `CappProgressReporter` that it can call at any
+moment to update the percentage and/or the message shown above the bar:
+
+```dart
+const totalBytes = 50 * 1024 * 1024;
+var downloaded = 0;
+
+await CappConsole.progressPercent(
+  'Connecting to server...',
+  (reporter) async {
+    while (downloaded < totalBytes) {
+      await Future.delayed(Duration(milliseconds: 100));
+      downloaded += 4 * 1024 * 1024;
+      if (downloaded > totalBytes) downloaded = totalBytes;
+
+      reporter.update(
+        percent: downloaded / totalBytes * 100,
+        message: 'Downloading file.zip: '
+            '${(downloaded / (1024 * 1024)).toStringAsFixed(1)} MB / '
+            '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB',
+      );
+    }
+  },
+  color: CappColors.info,
+);
+```
+
+```shell
+Downloading file.zip: 24.0 MB / 50.0 MB
+[██████████████░░░░░░░░░░░░░░░░] 48%
+```
+
+The `width` parameter controls how many characters wide the bar is (default
+`30`), and `color` controls the color of the filled part of the bar (default
+`CappColors.success`, i.e. green).
 
 ## Command Chaining
 

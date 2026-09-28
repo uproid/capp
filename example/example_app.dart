@@ -115,6 +115,42 @@ void main(List<String> args) async {
           return CappConsole.empty;
         },
       ),
+      // Shows CappConsole.progressPercent: the action reports its own
+      // completion percentage and updates the message shown above the bar
+      // while it runs. Here progress advances per package instead of per
+      // byte, and the message announces which package is currently being
+      // installed.
+      CappController(
+        'test:install',
+        description: 'Simulate installing project dependencies',
+        options: [helpOption],
+        run: (c) async {
+          const packages = [
+            'capp',
+            'http',
+            'path',
+            'collection',
+            'meta',
+            'test',
+          ];
+
+          await CappConsole.progressPercent(
+            'Resolving dependencies...',
+            (reporter) async {
+              for (var i = 0; i < packages.length; i++) {
+                await Future.delayed(Duration(milliseconds: 300));
+                reporter.update(
+                  percent: (i + 1) / packages.length * 100,
+                  message: 'Installing ${packages[i]} '
+                      '(${i + 1}/${packages.length})',
+                );
+              }
+            },
+            color: CappColors.warning,
+          );
+          return CappConsole.empty;
+        },
+      ),
       CappController(
         'exit',
         description: 'Exit the application',

@@ -206,6 +206,22 @@ class CappConsole {
     }
   }
 
+  static String _progressColorCode(CappColors color) {
+    switch (color) {
+      case CappColors.warning:
+        return '\x1B[33m';
+      case CappColors.error:
+        return '\x1B[31m';
+      case CappColors.success:
+        return '\x1B[32m';
+      case CappColors.info:
+        return '\x1B[36m';
+      case CappColors.none:
+      case CappColors.off:
+        return '';
+    }
+  }
+
   /// [clear] method is used to clear the console screen.
   static void clear() {
     // if (Platform.isWindows) {
@@ -363,6 +379,67 @@ class CappConsole {
       isLoading = false;
       await spinnerFuture;
       Cout.write('\r$message\t\tDone!                            \n');
+    }
+  }
+
+  /// [progressPercent] is used to show a progress widget of an action that
+  /// can report its own percentage of completion (e.g. downloading or
+  /// uploading a file), together with a message that can be updated at any
+  /// moment during the action.
+  ///
+  /// Unlike [progress], which only shows an indeterminate spinner/bar, the
+  /// [action] here receives a [CappProgressReporter] that it can call to
+  /// update the percentage (`reporter.update(percent: ...)`) and/or the
+  /// message shown above the bar (`reporter.update(message: ...)`) while it
+  /// runs.
+  ///
+  /// The [message] is the initial text shown above the progress bar.
+  /// The [width] is the number of characters used to draw the bar.
+  /// The [color] is the color of the filled part of the bar (defaults to
+  /// [CappColors.success], i.e. green).
+  static Future<T> progressPercent<T>(
+    String message,
+    Future<T> Function(CappProgressReporter reporter) action, {
+    int width = 30,
+    CappColors color = CappColors.success,
+  }) async {
+    var reporter = CappProgressReporter(message);
+    bool isLoading = true;
+    var colorCode = _progressColorCode(color);
+
+    String buildBar(double percent, int width) {
+      var filled = (percent / 100 * width).round().clamp(0, width);
+      const reset = '\x1B[0m';
+      var filledPart = '█' * filled;
+      if (colorCode.isNotEmpty) filledPart = '$colorCode$filledPart$reset';
+      return '$filledPart${'░' * (width - filled)}';
+    }
+
+    Future<void> render() async {
+      var isFirst = true;
+      while (isLoading) {
+        if (!isFirst) Cout.write('\x1B[1A');
+        isFirst = false;
+        var bar = buildBar(reporter.percent, width);
+        Cout.write('\r\x1B[2K${reporter.message}\n');
+        Cout.write(
+          '\r\x1B[2K[$bar] ${reporter.percent.toStringAsFixed(0)}%\n',
+        );
+        await Future.delayed(Duration(milliseconds: 80));
+      }
+    }
+
+    var renderFuture = render();
+
+    try {
+      var result = await action(reporter);
+      return result;
+    } finally {
+      isLoading = false;
+      await renderFuture;
+      Cout.write('\x1B[1A');
+      Cout.write('\r\x1B[2K${reporter.message}\n');
+      Cout.write('\r\x1B[2K[${buildBar(100, width)}] 100%\tDone!\n');
     }
   }
 
@@ -721,4 +798,28 @@ enum CappProgressType {
   circle,
   timer,
   puzzle,
+}
+
+/// [CappProgressReporter] is passed to the action of
+/// [CappConsole.progressPercent] so it can report its own progress while it
+/// runs, updating the percentage and/or the message shown to the user.
+class CappProgressReporter {
+  double _percent = 0;
+  String _message;
+
+  CappProgressReporter(this._message);
+
+  /// The current percentage of completion, between 0 and 100.
+  double get percent => _percent;
+
+  /// The message currently shown above the progress bar.
+  String get message => _message;
+
+  /// Updates the [percent] (clamped between 0 and 100) and/or the [message]
+  /// shown above the progress bar. Call this from inside the action as many
+  /// times as needed to reflect the real progress (e.g. bytes downloaded).
+  void update({double? percent, String? message}) {
+    if (percent != null) _percent = percent.clamp(0, 100);
+    if (message != null) _message = message;
+  }
 }

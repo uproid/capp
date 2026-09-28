@@ -43,6 +43,7 @@ Future<CappConsole> test(CappController c) async {
     'Progress bar',
     'Progress spinner',
     'Progress timer',
+    'Progress percent (download)',
     'Yes/No questions',
     'Input text',
     'Make a table',
@@ -97,6 +98,31 @@ Future<CappConsole> test(CappController c) async {
       'I am waiting here for 5 secounds!',
       () async => Future.delayed(Duration(seconds: 5)),
       type: CappProgressType.timer,
+    );
+  }
+  // Progress percent (download)
+  else if (select == 'Progress percent (download)') {
+    const totalBytes = 50 * 1024 * 1024; // 50 MB
+    var downloaded = 0;
+
+    await CappConsole.progressPercent(
+      'Connecting to server...',
+      (reporter) async {
+        while (downloaded < totalBytes) {
+          await Future.delayed(Duration(milliseconds: 100));
+          downloaded += 4 * 1024 * 1024; // simulate 4 MB per tick
+          if (downloaded > totalBytes) downloaded = totalBytes;
+
+          reporter.update(
+            percent: downloaded / totalBytes * 100,
+            message: 'Downloading file.zip: '
+                '${(downloaded / (1024 * 1024)).toStringAsFixed(1)} MB / '
+                '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB',
+          );
+        }
+        return true;
+      },
+      color: CappColors.info,
     );
   }
   // Yes/No Questions

@@ -1,3 +1,8 @@
+## 2.3.0
+- Added `CappConsole.progressPercent`, a progress widget for actions that can report their own completion percentage (e.g. downloads, uploads, multi-step builds). The action receives a `CappProgressReporter` to update the percentage and/or the message shown above the bar at any moment, with a configurable `color` (defaults to green) and bar `width`.
+- Updated `example/example.dart`, `example/example_app.dart` (`test:install`), and `example/example_chain.dart` (`build`) with distinct demonstrations of `progressPercent`.
+- Fixed the `writeHelpModern groups namespaced sub-commands` test, which captured output via `runZoned`'s `print` override while `writeHelpModern` writes through `Cout`; it now uses `CappManager.addOnWrite`/`removeOnWrite` to capture the real output.
+
 ## 2.2.0
 - Added `CappProgressType.puzzle` and a matching puzzle-style spinner to `CappConsole.progress`, with `example/example.dart` updated to demonstrate the new animation.
 - Added output interception support through `CappManager.addOnWrite` and `removeOnWrite`, backed by the new `Cout` helper, so console output can be observed or captured without changing the normal terminal flow.
